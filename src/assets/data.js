@@ -3,7 +3,7 @@ import p2 from './products/camera/Fujifilm Instax Mini 9 Instant Camera (Cobalt 
 import p3 from './products/mobile/realme 7 Pro (Mirror Silver, 128 GB) (6 GB RAM) 1.webp'
 import p4 from './products/TV/Mi 5A 100 cm (40 inch) Full HD LED Smart Android TV with Dolby Audio (2022 Model) 1.webp'
 import p5 from './products/speakers/boAt Rugby Plus 1.webp'
-import p6 from './products/earphones/boAt Rockerz 103 pro 3.webp'
+
 
 
 
@@ -33,14 +33,7 @@ const popularProducts = [
     old_price:15488.00,
     category: 'camera',
   },
-  {
-    id: 5,
-    name: 'boAt Rockerz 103 pro',
-    image: p6,
-    new_price: 749.00,
-    old_price:988.00,
-    category: 'earphone',
-  },
+ 
   {
     id: 6,
     name: 'Mi 5A 100 cm (40 inch) Full HD LED Smart Android TV with Dolby Audio (2022 Model)',
