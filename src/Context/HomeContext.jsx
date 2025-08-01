@@ -1,23 +1,36 @@
-import React, { createContext, useState } from "react";
-import popularProducts from '../assets/data';
-import allProducts from '../assets/allProducts';
-import { useEffect } from "react";
+import React, { createContext, useState, useEffect } from "react";
 
 export const HomeContext = createContext(null);
 
-// Initialize cart with product IDs set to 0
-const getDefaultCart = () => {
+const getDefaultCart = (products) => {
   let cart = {};
-  for (let i = 0; i < allProducts.length; i++) {
-    cart[allProducts[i].id] = 0;
+  for (let i = 0; i < products.length; i++) {
+    cart[products[i].id] = 0;
   }
   return cart;
 };
 
+const API_BASE = import.meta.env.VITE_API_URL;
+
 const HomeContextProvider = (props) => {
-  
-  const [cartItems, setCartItems] = useState(getDefaultCart());
-    
+  const [allProducts, setAllProducts] = useState([]);
+  const [cartItems, setCartItems] = useState({});
+
+  // Fetch products from backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/allproducts`);
+        const data = await res.json();
+        setAllProducts(data);
+        setCartItems(getDefaultCart(data));
+      } catch (err) {
+        console.error("Failed to load products:", err);
+      }
+    };
+    fetchProducts();
+  }, []);
+
   const addToCart = (itemId) => {
     setCartItems((prev) => ({
       ...prev,
@@ -40,7 +53,6 @@ const HomeContextProvider = (props) => {
   };
 
   const contextValue = {
-    popularProducts,
     allProducts,
     cartItems,
     addToCart,
