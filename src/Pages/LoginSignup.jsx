@@ -17,7 +17,7 @@ export const LoginSignup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const API_BASE = 'https://backend-yourname.vercel.app'; // 🔁 replace with your backend URL
+  const API_BASE = 'https://backend-91e3.onrender.com'; // 🔁 replace with your backend URL
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
