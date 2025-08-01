@@ -4,7 +4,7 @@ import p3 from './products/mobile/realme 7 Pro (Mirror Silver, 128 GB) (6 GB RAM
 import p4 from './products/TV/Mi 5A 100 cm (40 inch) Full HD LED Smart Android TV with Dolby Audio (2022 Model) 1.webp'
 import p5 from './products/speakers/boAt Rugby Plus 1.webp'
 import p6 from './products/earphones/boAt Rockerz 103 pro 3.webp'
-import  p7 from './products/watches/boAt Cosmos pro 1.webp'
+
 
 
 const popularProducts = [
@@ -16,14 +16,7 @@ const popularProducts = [
     old_price:1488.00,
     category: 'airpod',
   },
-  {
-    id: 2,
-    name: 'boAt Cosmos pro',
-    image: p7,
-    new_price: 1299.00,
-    old_price:1599.00,
-    category: 'watches',
-  },
+ 
   {
     id: 3,
     name: 'realme 7 Pro (Mirror Silver, 128 GB) (6 GB RAM)',
