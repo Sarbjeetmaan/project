@@ -17,6 +17,7 @@ export const LoginSignup = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const backendURL = import.meta.env.VITE_BACKEND_URL;
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -34,33 +35,30 @@ export const LoginSignup = () => {
         if (email !== confirmEmail) throw new Error('Emails do not match');
         if (password !== confirmPassword) throw new Error('Passwords do not match');
 
-        const res = await fetch('http://localhost:4000/signup', {
+        const res = await fetch(`${backendURL}/signup`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ username, email, password }),
         });
 
         const data = await res.json();
-        console.log('Signup response:', data);
-
         if (!res.ok) throw new Error(data.message || 'Signup failed');
         alert(data.message || 'Signed up successfully');
         navigate('/');
       } else {
-        const res = await fetch('http://localhost:4000/login', {
+        const res = await fetch(`${backendURL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
           body: JSON.stringify({ email, password }),
         });
 
         const data = await res.json();
-        console.log('Login response:', data);
-
         if (!res.ok || !data.token) throw new Error(data.message || 'Login failed');
         localStorage.setItem('token', data.token);
         alert('Login successful');
         navigate('/');
-        // window.location.href = '/'; // Alternative fallback redirect
       }
     } catch (err) {
       console.error(err);
