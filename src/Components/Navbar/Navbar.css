@@ -1,0 +1,117 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: white;
+  padding: 10px 30px;
+  border-bottom: 1px solid #eaeaea;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.nav-logo .logo-text {
+  font-size: 26px;
+  font-weight: bold;
+  color: #0074e4; /* Electric blue */
+  text-decoration: none;
+}
+
+.nav-categories {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-categories li {
+  padding: 5px 0;
+}
+
+.nav-link {
+  color: #444;
+  text-decoration: none;
+  font-weight: 300;
+  font-size: 15px;
+  transition: color 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #0074e4; /* On hover */
+}
+
+.nav-link.active {
+  color: #0074e4; /* Active tab */
+  font-weight: 600;
+  border-bottom: none; /* No underline */
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.login-link {
+  text-decoration: none;
+  color: #0074e4;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.cart-icon {
+  font-size: 18px;
+  color: #0074e4;
+  cursor: pointer;
+}
+
+/* Common styles... (continue from previous CSS) */
+
+.hamburger {
+  display: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #0074e4;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 60px;
+  left: 0;
+  right: 0;
+  background-color: white;
+  border-top: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+}
+
+.dropdown-item {
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.dropdown-item:hover {
+  background-color: #f9f9f9;
+  color: #0074e4;
+}
+
+/* Hide horizontal menu on mobile, show hamburger */
+@media (max-width: 1024px)  {
+  .nav-categories {
+    display: none;
+  }
+
+  .hamburger {
+    display: block;
+  }
+}
+
+

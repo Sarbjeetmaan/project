@@ -1,0 +1,56 @@
+.related-products {
+  padding: 40px 80px;
+  background-color: #f9f9f9;
+}
+
+.related-products h2 {
+  font-size: 28px;
+  font-weight: 600;
+  margin-bottom: 25px;
+  color: #222;
+  text-transform: capitalize;
+  letter-spacing: 0.5px;
+}
+
+.related-products-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+/* Optional: Subtle card hover effect */
+.related-products-list > * {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.related-products-list > *:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Tablet */
+@media (max-width: 768px) {
+  .related-products {
+    padding: 28px 40px;
+  }
+
+  .related-products h2 {
+    font-size: 24px;
+    text-align: center;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .related-products {
+    padding: 20px;
+  }
+
+  .related-products h2 {
+    font-size: 20px;
+  }
+
+  .related-products-list {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 16px;
+  }
+}

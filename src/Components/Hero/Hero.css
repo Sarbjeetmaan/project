@@ -1,0 +1,25 @@
+.hero-slide {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+}
+
+.hero-slide img {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* ✅ Mobile fix: avoid image cropping, maintain full visibility */
+@media (max-width: 768px) {
+  .hero-slide img {
+    width: 100%;
+    height: auto;            /* Let height adjust based on image ratio */
+    object-fit: contain;     /* Show full image without cropping */
+    border-radius: 8px;
+    display: block;
+    margin: 0 auto;
+  }
+}

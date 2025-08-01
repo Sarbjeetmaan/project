@@ -1,0 +1,112 @@
+.item {
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 1px solid #eee;
+  padding: 16px;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+  background-color: #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+}
+
+.item:hover {
+  transform: scale(1.03);
+}
+
+.item-image {
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.item-name {
+  margin: 6px 0;
+  font-size: 16px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.item-prices {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.item-price-new {
+  font-size: 18px;
+  font-weight: 600;
+  color: #007BFF; /* Electric Blue */
+}
+
+.item-price-old {
+  font-size: 16px;
+  color: #8c8c8c;
+  text-decoration: line-through;
+}
+
+.item-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ---------------- Responsive Design ---------------- */
+
+/* For tablets and smaller laptops */
+@media (max-width: 992px) {
+  .item {
+    width: 45%;
+    margin: 10px auto;
+  }
+}
+
+/* For phones */
+@media (max-width: 600px) {
+  .item {
+    width: 90%;
+    margin: 10px auto;
+    padding: 12px;
+  }
+
+  .item-image {
+    height: 180px;
+  }
+
+  .item-name {
+    font-size: 15px;
+  }
+
+  .item-price-new {
+    font-size: 16px;
+  }
+
+  .item-price-old {
+    font-size: 14px;
+  }
+}
+@media screen and (min-width: 600px) and (max-width: 1024px) {
+  .item {
+    width: 200px;
+    padding: 12px;
+  }
+
+  .item-image {
+    height: 180px;
+  }
+
+  .item-name {
+    font-size: 15px;
+  }
+
+  .item-price-new {
+    font-size: 16px;
+  }
+
+  .item-price-old {
+    font-size: 14px;
+  }
+}
