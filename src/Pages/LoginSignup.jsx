@@ -15,9 +15,9 @@ export const LoginSignup = () => {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
-  const backendURL = import.meta.env.VITE_BACKEND_URL;
+
+  const API_BASE = 'https://backend-yourname.vercel.app'; // 🔁 replace with your backend URL
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -31,38 +31,40 @@ export const LoginSignup = () => {
     const { username, email, confirmEmail, password, confirmPassword } = formData;
 
     try {
+      let endpoint = isSignup ? '/signup' : '/login';
+      let payload = isSignup
+        ? { username, email, password }
+        : { email, password };
+
+      // Validate emails and passwords
       if (isSignup) {
         if (email !== confirmEmail) throw new Error('Emails do not match');
         if (password !== confirmPassword) throw new Error('Passwords do not match');
+      }
 
-        const res = await fetch(`${backendURL}/signup`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ username, email, password }),
-        });
+      const res = await fetch(`${API_BASE}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || 'Signup failed');
-        alert(data.message || 'Signed up successfully');
-        navigate('/');
-      } else {
-        const res = await fetch(`${backendURL}/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ email, password }),
-        });
+      const data = await res.json();
 
-        const data = await res.json();
-        if (!res.ok || !data.token) throw new Error(data.message || 'Login failed');
+      if (!res.ok) {
+        throw new Error(data.message || data.errors || 'Something went wrong');
+      }
+
+      if (!isSignup && data.token) {
         localStorage.setItem('token', data.token);
         alert('Login successful');
-        navigate('/');
+      } else if (isSignup) {
+        alert(data.message || 'Signed up successfully');
       }
+
+      navigate('/');
     } catch (err) {
       console.error(err);
-      setError(err.message);
+      setError(err.message || 'Unexpected error');
     } finally {
       setLoading(false);
     }
@@ -102,6 +104,7 @@ export const LoginSignup = () => {
             onChange={handleChange}
             required
           />
+
           {isSignup && (
             <input
               type="email"
@@ -121,6 +124,7 @@ export const LoginSignup = () => {
             onChange={handleChange}
             required
           />
+
           {isSignup && (
             <input
               type="password"
