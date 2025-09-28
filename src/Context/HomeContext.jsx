@@ -1,41 +1,44 @@
 import React, { createContext, useState, useEffect } from "react";
 import popularProducts from '../assets/data';
-import allProducts from '../assets/allProducts';
+import localProducts from '../assets/allProducts'; // renamed for clarity
 
 export const HomeContext = createContext(null);
 
 // Initialize cart with product IDs set to 0
-const getDefaultCart = () => {
+const getDefaultCart = (products) => {
   let cart = {};
-  for (let i = 0; i < allProducts.length; i++) {
-    cart[allProducts[i].id] = 0;
+  for (let i = 0; i < products.length; i++) {
+    cart[products[i].id] = 0;
   }
   return cart;
 };
 
 const HomeContextProvider = (props) => {
-  const [cartItems, setCartItems] = useState(getDefaultCart());
+  const [cartItems, setCartItems] = useState({});
+  const [allProducts, setAllProducts] = useState([...localProducts]); // start with local products
 
-  // ✅ Load cart from backend after login
+  // ✅ Fetch backend products and merge with local ones
   useEffect(() => {
-    const fetchCart = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const res = await fetch('https://backend-91e3.onrender.com/cart', {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          const data = await res.json();
-          if (data.cart) setCartItems(data.cart);
-        } catch (err) {
-          console.error("Failed to load cart:", err);
-        }
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("http://localhost:4000/allproducts"); // backend endpoint
+        const backendProducts = await res.json();
+
+        // Merge local + backend products
+        const mergedProducts = [...localProducts, ...backendProducts];
+        setAllProducts(mergedProducts);
+
+        // Initialize cart after products are loaded
+        setCartItems(getDefaultCart(mergedProducts));
+      } catch (err) {
+        console.error("Failed to fetch backend products:", err);
+        // fallback: only local products
+        setAllProducts(localProducts);
+        setCartItems(getDefaultCart(localProducts));
       }
     };
 
-    fetchCart();
+    fetchProducts();
   }, []);
 
   // ✅ Add to Cart

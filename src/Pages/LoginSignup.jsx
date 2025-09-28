@@ -17,7 +17,7 @@ export const LoginSignup = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const API_BASE = 'https://backend-91e3.onrender.com'; // 🔁 replace with your backend URL
+  const API_BASE = 'https://backend-91e3.onrender.com'; // backend URL
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -32,11 +32,8 @@ export const LoginSignup = () => {
 
     try {
       let endpoint = isSignup ? '/signup' : '/login';
-      let payload = isSignup
-        ? { username, email, password }
-        : { email, password };
+      let payload = isSignup ? { username, email, password } : { email, password };
 
-      // Validate emails and passwords
       if (isSignup) {
         if (email !== confirmEmail) throw new Error('Emails do not match');
         if (password !== confirmPassword) throw new Error('Passwords do not match');
@@ -49,21 +46,16 @@ export const LoginSignup = () => {
       });
 
       const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || data.errors || 'Something went wrong');
-      }
+      if (!res.ok) throw new Error(data.message || 'Something went wrong');
 
       if (!isSignup && data.token) {
         localStorage.setItem('token', data.token);
-        alert('Login successful');
-      } else if (isSignup) {
-        alert(data.message || 'Signed up successfully');
+        localStorage.setItem('role', data.role); // 👈 save role
       }
 
+      alert(isSignup ? data.message || 'Signed up successfully' : 'Login successful');
       navigate('/');
     } catch (err) {
-      console.error(err);
       setError(err.message || 'Unexpected error');
     } finally {
       setLoading(false);
@@ -72,91 +64,95 @@ export const LoginSignup = () => {
 
   return (
     <div className="auth-container">
-      <div className="auth-box">
-        <h2>{isSignup ? 'Sign Up' : 'Log In'}</h2>
-        <p>
-          {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
-          <span onClick={() => setIsSignup(!isSignup)}>
-            {isSignup ? 'Log In' : 'Sign Up'}
-          </span>
-        </p>
+      {/* Left Panel with Company Info */}
+      <div className="auth-left animate-fade">
+        <h1>Eloc</h1>
+        <p>Your one-stop e-commerce store for all electronic gadgets and accessories. Discover the latest products at the best prices!</p>
+        <p className="auth-slogan">Smart. Fast. Reliable.</p>
+      </div>
 
-        {error && <p className="auth-error">{error}</p>}
-        {loading && <p className="auth-loading">Please wait...</p>}
+      {/* Right Panel with Form */}
+      <div className="auth-right animate-slide">
+        <div className="auth-box">
+          <h2>{isSignup ? 'Sign Up' : 'Log In'}</h2>
+          <p>
+            {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
+            <span onClick={() => setIsSignup(!isSignup)}>
+              {isSignup ? 'Log In' : 'Sign Up'}
+            </span>
+          </p>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          {isSignup && (
-            <input
-              type="text"
-              name="username"
-              placeholder="Username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-          )}
+          {error && <p className="auth-error">{error}</p>}
+          {loading && <p className="auth-loading">Please wait...</p>}
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-
-          {isSignup && (
+          <form className="auth-form" onSubmit={handleSubmit}>
+            {isSignup && (
+              <input
+                type="text"
+                name="username"
+                placeholder="Username"
+                value={formData.username}
+                onChange={handleChange}
+                required
+              />
+            )}
             <input
               type="email"
-              name="confirmEmail"
-              placeholder="Confirm Email"
-              value={formData.confirmEmail}
+              name="email"
+              placeholder="Email"
+              value={formData.email}
               onChange={handleChange}
               required
             />
-          )}
-
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-
-          {isSignup && (
+            {isSignup && (
+              <input
+                type="email"
+                name="confirmEmail"
+                placeholder="Confirm Email"
+                value={formData.confirmEmail}
+                onChange={handleChange}
+                required
+              />
+            )}
             <input
               type="password"
-              name="confirmPassword"
-              placeholder="Confirm Password"
-              value={formData.confirmPassword}
+              name="password"
+              placeholder="Password"
+              value={formData.password}
               onChange={handleChange}
               required
             />
-          )}
+            {isSignup && (
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm Password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+            )}
+            <button type="submit" disabled={loading}>
+              {isSignup ? 'Sign Up' : 'Log In'}
+            </button>
+          </form>
 
-          <button type="submit" disabled={loading}>
-            {isSignup ? 'Sign Up' : 'Log In'}
-          </button>
-        </form>
+          <div className="divider">or</div>
 
-        <div className="divider">or</div>
+          <div className="social-buttons">
+            <button className="google">
+              <FaGoogle /> Continue with Google
+            </button>
+            <button className="facebook">
+              <FaFacebookF /> Continue with Facebook
+            </button>
+          </div>
 
-        <div className="social-buttons">
-          <button className="google">
-            <FaGoogle /> Continue with Google
-          </button>
-          <button className="facebook">
-            <FaFacebookF /> Continue with Facebook
-          </button>
+          <p className="auth-footer">
+            * By signing up, you agree to our <a href="#">Terms of Use</a> and{' '}
+            <a href="#">Privacy Policy</a>.
+          </p>
         </div>
-
-        <p className="auth-footer">
-          * By signing up, you agree to our{' '}
-          <a href="#">Terms of Use</a> and{' '}
-          <a href="#">Privacy Policy</a>.
-        </p>
       </div>
     </div>
   );
