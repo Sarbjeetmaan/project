@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 
 export const CartItems = () => {
   const {
-    popularProducts,
+    allProducts,   // ✅ use allProducts instead of only popularProducts
     cartItems,
     addToCart,
     removeFromCart,
@@ -16,21 +16,27 @@ export const CartItems = () => {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('token'); // ✅ Login check
 
-  const cartTotal = popularProducts.reduce((total, product) => {
-    return total + product.new_price * cartItems[product.id];
+  // ✅ Calculate total using allProducts
+  const cartTotal = allProducts.reduce((total, product) => {
+    return total + (product.new_price * (cartItems[product.id] || 0));
   }, 0);
 
   return (
     <div className="cart-container">
       <h2 className="cart-title">SHOPPING BAG</h2>
       <div className="cart-content">
+        
         {/* Left: Cart Items */}
         <div className="cart-items-section">
-          {popularProducts.map((item) => {
+          {allProducts.map((item) => {
             if (cartItems[item.id] > 0) {
               return (
                 <div className="cart-item" key={item.id}>
-                  <img src={item.image} alt={item.name} className="cart-item-image" />
+                  <img
+                    src={item.images?.[0] || item.image}  // ✅ support multiple images
+                    alt={item.name}
+                    className="cart-item-image"
+                  />
                   <div className="cart-item-info">
                     <h3>{item.name}</h3>
                     <p><strong>Rs. {item.new_price.toFixed(2)}</strong></p>

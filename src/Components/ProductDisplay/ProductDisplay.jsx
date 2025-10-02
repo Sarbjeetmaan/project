@@ -2,10 +2,18 @@ import React, { useContext, useState } from 'react';
 import './ProductDisplay.css';
 import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
 import { HomeContext } from '../../Context/HomeContext';
+import { useNavigate } from 'react-router-dom';
 
 const ProductDisplay = ({ product }) => {
   const { addToCart } = useContext(HomeContext);
   const [mainImage, setMainImage] = useState(product.images?.[0] || product.image);
+  const navigate = useNavigate();
+
+  // Handle add to cart + navigate
+  const handleAddToCart = () => {
+    addToCart(product.id);   // add product to cart (context function)
+    navigate('/cart');       // navigate to cart page
+  };
 
   return (
     <div className='productdisplay'>
@@ -28,17 +36,13 @@ const ProductDisplay = ({ product }) => {
         </div>
       </div>
 
-      {/* Right - Slide Panel Content */}
+      {/* Right - Product Content */}
       <div className="productdisplay-right-scrollable">
         <div className="productdisplay-right">
           <h1>{product.name}</h1>
 
           <div className="productdisplay-right-stars">
-            <FaStar />
-            <FaStar />
-            <FaStar />
-            <FaStarHalfAlt />
-            <FaRegStar />
+            <FaStar /><FaStar /><FaStar /><FaStarHalfAlt /><FaRegStar />
             <span>(122)</span>
           </div>
 
@@ -54,8 +58,12 @@ const ProductDisplay = ({ product }) => {
             </p>
           </div>
 
-          <button onClick={() => addToCart(product.id)} className="add-to-cart-btn">Add to Cart</button>
+          {/* Updated button */}
+          <button onClick={handleAddToCart} className="add-to-cart-btn">
+            Add to Cart
+          </button>
 
+          {/* Reviews Section */}
           <div className="productdisplay-reviews">
             <h2>Customer Reviews</h2>
 
