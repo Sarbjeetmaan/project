@@ -3,7 +3,7 @@ import './CSS/LoginSignup.css';
 import { FaGoogle, FaFacebookF } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 
-export const LoginSignup = () => {
+const LoginSignup = () => {
   const [isSignup, setIsSignup] = useState(true);
   const [formData, setFormData] = useState({
     username: '',
@@ -12,11 +12,10 @@ export const LoginSignup = () => {
     password: '',
     confirmPassword: '',
   });
-
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
+  const navigate = useNavigate();
   const API_BASE = 'https://backend-91e3.onrender.com'; // backend URL
 
   const handleChange = (e) => {
@@ -49,12 +48,21 @@ export const LoginSignup = () => {
       if (!res.ok) throw new Error(data.message || 'Something went wrong');
 
       if (!isSignup && data.token) {
+        // Save token and role
         localStorage.setItem('token', data.token);
-        localStorage.setItem('role', data.role); // 👈 save role
+        localStorage.setItem('role', data.role);
+
+        // ✅ Role-based redirect
+        if (data.role === 'admin') {
+          // Redirect admin to deployed admin frontend
+          window.location.href = 'https://admin-68ww.vercel.app';
+        } else {
+          // Normal user → stay in user frontend
+          navigate('/');
+        }
       }
 
       alert(isSignup ? data.message || 'Signed up successfully' : 'Login successful');
-      navigate('/');
     } catch (err) {
       setError(err.message || 'Unexpected error');
     } finally {
@@ -64,14 +72,17 @@ export const LoginSignup = () => {
 
   return (
     <div className="auth-container">
-      {/* Left Panel with Company Info */}
+      {/* Left Panel */}
       <div className="auth-left animate-fade">
         <h1>Eloc</h1>
-        <p>Your one-stop e-commerce store for all electronic gadgets and accessories. Discover the latest products at the best prices!</p>
+        <p>
+          Your one-stop e-commerce store for all electronic gadgets and accessories. Discover
+          the latest products at the best prices!
+        </p>
         <p className="auth-slogan">Smart. Fast. Reliable.</p>
       </div>
 
-      {/* Right Panel with Form */}
+      {/* Right Panel */}
       <div className="auth-right animate-slide">
         <div className="auth-box">
           <h2>{isSignup ? 'Sign Up' : 'Log In'}</h2>
@@ -96,6 +107,7 @@ export const LoginSignup = () => {
                 required
               />
             )}
+
             <input
               type="email"
               name="email"
@@ -104,6 +116,7 @@ export const LoginSignup = () => {
               onChange={handleChange}
               required
             />
+
             {isSignup && (
               <input
                 type="email"
@@ -114,6 +127,7 @@ export const LoginSignup = () => {
                 required
               />
             )}
+
             <input
               type="password"
               name="password"
@@ -122,6 +136,7 @@ export const LoginSignup = () => {
               onChange={handleChange}
               required
             />
+
             {isSignup && (
               <input
                 type="password"
@@ -132,6 +147,7 @@ export const LoginSignup = () => {
                 required
               />
             )}
+
             <button type="submit" disabled={loading}>
               {isSignup ? 'Sign Up' : 'Log In'}
             </button>
