@@ -59,7 +59,7 @@ const SearchBar = () => {
           className="searchbar-input"
         />
         <button type="submit" className="searchbar-button">
-          🔍
+          🔍︎
         </button>
       </form>
 

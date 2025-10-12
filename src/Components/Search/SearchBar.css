@@ -1,7 +1,7 @@
 /* --- Search Bar Styles --- */
 .searchbar-wrapper {
   position: sticky;
-  top: 70px; /* below navbar */
+  top: 55px; /* below navbar */
   background: #fff;
   z-index: 50;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
