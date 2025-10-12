@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import './CSS/LoginSignup.css';
-import { FaGoogle, FaFacebookF } from 'react-icons/fa';
+
+import { FaGoogle, FaFacebookF, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+
 
 const LoginSignup = () => {
   const [isSignup, setIsSignup] = useState(true);
@@ -12,6 +14,8 @@ const LoginSignup = () => {
     password: '',
     confirmPassword: '',
   });
+  const [showPassword, setShowPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false); 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -52,7 +56,7 @@ const LoginSignup = () => {
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', data.role);
 
-        // ✅ Role-based redirect
+        // Role-based redirect
         if (data.role === 'admin') {
           // Redirect admin to deployed admin frontend
           window.location.href = 'https://admin-68ww.vercel.app';
@@ -128,25 +132,44 @@ const LoginSignup = () => {
               />
             )}
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
+           {/* Password Field with Show/Hide */}
+<div className="password-field">
+  <input
+    type={showPassword ? 'text' : 'password'}
+    name="password"
+    placeholder="Password"
+    value={formData.password}
+    onChange={handleChange}
+    required
+  />
+  <span
+    className="toggle-password"
+    onClick={() => setShowPassword((prev) => !prev)}
+  >
+    {showPassword ? <FaEyeSlash /> : <FaEye />}
+  </span>
+</div>
 
-            {isSignup && (
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-            )}
+{/* Confirm Password Field with Show/Hide */}
+{isSignup && (
+  <div className="password-field">
+    <input
+      type={showConfirmPassword ? 'text' : 'password'}
+      name="confirmPassword"
+      placeholder="Confirm Password"
+      value={formData.confirmPassword}
+      onChange={handleChange}
+      required
+    />
+    <span
+      className="toggle-password"
+      onClick={() => setShowConfirmPassword((prev) => !prev)}
+    >
+      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+    </span>
+  </div>
+)}
+
 
             <button type="submit" disabled={loading}>
               {isSignup ? 'Sign Up' : 'Log In'}

@@ -16,30 +16,44 @@ const getDefaultCart = (products) => {
 const HomeContextProvider = (props) => {
   const [cartItems, setCartItems] = useState({});
   const [allProducts, setAllProducts] = useState([...localProducts]); // start with local products
+useEffect(() => {
+  const fetchProducts = async () => {
+    try {
+      // ✅ 1. Use your deployed backend, not localhost
+      const res = await fetch("https://backend-91e3.onrender.com/allproducts");
 
-  // ✅ Fetch backend products and merge with local ones
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const res = await fetch("http://localhost:4000/allproducts"); // backend endpoint
-        const backendProducts = await res.json();
+      // ✅ 2. Parse JSON
+      const backendProducts = await res.json();
 
-        // Merge local + backend products
-        const mergedProducts = [...localProducts, ...backendProducts];
-        setAllProducts(mergedProducts);
+      // ✅ 3. Normalize _id → id (MongoDB uses _id)
+      const normalizedBackendProducts = backendProducts.map((p) => ({
+        ...p,
+        id: p.id || p._id,
+      }));
 
-        // Initialize cart after products are loaded
-        setCartItems(getDefaultCart(mergedProducts));
-      } catch (err) {
-        console.error("Failed to fetch backend products:", err);
-        // fallback: only local products
-        setAllProducts(localProducts);
-        setCartItems(getDefaultCart(localProducts));
-      }
-    };
+      // ✅ 4. Merge local + backend products (avoid duplicates)
+      const mergedProducts = [
+        ...localProducts,
+        ...normalizedBackendProducts.filter(
+          (bp) => !localProducts.some((lp) => lp.id === bp.id)
+        ),
+      ];
 
-    fetchProducts();
-  }, []);
+      // ✅ 5. Update state
+      setAllProducts(mergedProducts);
+      setCartItems(getDefaultCart(mergedProducts));
+    } catch (err) {
+      console.error("Failed to fetch backend products:", err);
+
+      // fallback to local data
+      setAllProducts(localProducts);
+      setCartItems(getDefaultCart(localProducts));
+    }
+  };
+
+  fetchProducts();
+}, []);
+
 
   // ✅ Add to Cart
   const addToCart = async (itemId) => {

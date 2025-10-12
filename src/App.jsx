@@ -10,6 +10,9 @@ import Cart from './Pages/cart';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import HomeContextProvider from './Context/HomeContext';
+import SearchBar from './Components/Search/Searchbar';
+import SearchResults from './Pages/SearchResults';
+
 
 function AppContent() {
   const location = useLocation();
@@ -19,6 +22,7 @@ function AppContent() {
   return (
     <>
       <Navbar />
+      <SearchBar />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/airpods" element={<ShopCategory category="airpod" />} />
@@ -36,6 +40,8 @@ function AppContent() {
         <Route path="/product/:productId" element={<Product />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/login" element={<LoginSignup />} />
+        <Route path="/search" element={<SearchResults />} />
+        
       </Routes>
       {shouldShowFooter && <Footer />}
     </>

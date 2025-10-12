@@ -5,7 +5,8 @@
   display: flex;
   min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background:  #ffffff ;/* page gradient */
+  background: #ffffff; /* page gradient */
+  box-sizing: border-box; /* ensures padding is included in width */
 }
 
 /* =========================
@@ -110,6 +111,8 @@
   font-size: 14px;
   outline: none;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%;
+  box-sizing: border-box; /* ensures padding doesn't break layout */
 }
 
 .auth-form input:focus {
@@ -208,6 +211,37 @@
 }
 
 /* =========================
+   Password Field Show/Hide
+========================= */
+.password-field {
+  position: relative;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.password-field input {
+  width: 100%;
+  padding-right: 40px; /* space for eye icon */
+  box-sizing: border-box;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #555;
+  font-size: 1.2rem;
+  z-index: 10; /* stays above input text */
+  transition: color 0.2s ease;
+}
+
+.toggle-password:hover {
+  color: #000;
+}
+
+/* =========================
    Animations
 ========================= */
 @keyframes fadeIn {
@@ -239,4 +273,5 @@
   .auth-left h1 { font-size: 36px; }
   .auth-left p { font-size: 16px; max-width: 100%; }
   .auth-form input, .auth-form button, .social-buttons button { font-size: 14px; padding: 12px; }
+  .toggle-password { font-size: 1rem; } /* slightly smaller on mobile */
 }

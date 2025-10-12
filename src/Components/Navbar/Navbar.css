@@ -102,6 +102,59 @@
   background-color: #f9f9f9;
   color: #0074e4;
 }
+/* =========================
+   User Dropdown Menu
+========================= */
+.user-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.user-dropdown .login-link {
+  background: none;
+  border: none;
+  color: #007BFF;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+
+.user-dropdown .login-link:hover {
+  color: #0056b3;
+}
+
+.dropdown-menu-user {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #fff;
+  min-width: 140px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-menu-user a,
+.dropdown-menu-user button {
+  padding: 10px 16px;
+  text-align: left;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background 0.2s ease;
+}
+
+.dropdown-menu-user a:hover,
+.dropdown-menu-user button:hover {
+  background-color: #f0f0f0;
+}
+
 
 /* Hide horizontal menu on mobile, show hamburger */
 @media (max-width: 1024px)  {
