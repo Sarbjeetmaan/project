@@ -4,6 +4,8 @@ import localProducts from "../assets/allProducts";
 
 export const HomeContext = createContext(null);
 
+const BACKEND_URL = import.meta.env.VITE_API_URL || "https://backend-91e3.onrender.com";
+
 const getDefaultCart = (products) => {
   let cart = {};
   for (let i = 0; i < products.length; i++) {
@@ -12,15 +14,13 @@ const getDefaultCart = (products) => {
   return cart;
 };
 
-const BACKEND_URL = "https://backend-91e3.onrender.com";
-
 const HomeContextProvider = (props) => {
-  const [allProducts, setAllProducts] = useState([...localProducts]);
+  const [allProducts, setAllProducts] = useState([]);
   const [cartItems, setCartItems] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
-  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  // 1️⃣ Load products from backend
+  // 1️⃣ Fetch products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -32,67 +32,73 @@ const HomeContextProvider = (props) => {
           id: p.id || p._id,
         }));
 
-        const merged = [
+        const mergedProducts = [
           ...localProducts,
           ...normalizedBackendProducts.filter(
             (bp) => !localProducts.some((lp) => lp.id === bp.id)
           ),
         ];
 
-        setAllProducts(merged);
-
-        // Try loading cart from localStorage first
-        const savedCart = localStorage.getItem("cartItems");
-        if (savedCart) {
-          setCartItems(JSON.parse(savedCart));
-        } else {
-          setCartItems(getDefaultCart(merged));
-        }
-
+        setAllProducts(mergedProducts);
+        setCartItems(getDefaultCart(mergedProducts));
       } catch (err) {
-        console.error("Failed to fetch backend products:", err);
+        console.error("Failed to fetch products:", err);
         setAllProducts(localProducts);
         setCartItems(getDefaultCart(localProducts));
-      } finally {
-        setLoadingProducts(false);
       }
     };
 
     fetchProducts();
   }, []);
 
-  // 2️⃣ Load cart from backend if logged in
+  // 2️⃣ Fetch user's cart from backend **after products are loaded**
+  useEffect(() => {
+    const fetchCart = async () => {
+      const token = localStorage.getItem("token");
+      if (!token || allProducts.length === 0) return;
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/getcart`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (data.success && data.cart) {
+          const backendCart = Object.fromEntries(Object.entries(data.cart));
+          // Merge backend cart with default cart to include all product IDs
+          const mergedCart = { ...getDefaultCart(allProducts), ...backendCart };
+          setCartItems(mergedCart);
+        }
+      } catch (err) {
+        console.error("Error loading backend cart:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCart();
+  }, [allProducts]);
+
+  // 3️⃣ Save cart whenever it changes
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      fetch(`${BACKEND_URL}/getcart`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          if (data.success && data.cart) {
-            setCartItems(Object.fromEntries(Object.entries(data.cart)));
-          }
-        })
-        .catch((err) => console.error("Error loading cart:", err));
-    }
-  }, [isLoggedIn]);
+    if (!token) return;
 
-  // 3️⃣ Persist cart locally + backend whenever it changes
-  useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    const saveCart = async () => {
+      try {
+        await fetch(`${BACKEND_URL}/savecart`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ cartItems }),
+        });
+      } catch (err) {
+        console.error("Error saving cart:", err);
+      }
+    };
 
-    const token = localStorage.getItem("token");
-    if (token) {
-      fetch(`${BACKEND_URL}/savecart`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ cartItems }),
-      }).catch((err) => console.error("Error saving cart:", err));
-    }
+    saveCart();
   }, [cartItems]);
 
   // 4️⃣ Cart operations
@@ -124,24 +130,24 @@ const HomeContextProvider = (props) => {
   const logout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
-    setCartItems({});
-  };
-
-  const contextValue = {
-    popularProducts,
-    allProducts,
-    cartItems,
-    addToCart,
-    decreaseQuantity,
-    removeFromCart,
-    isLoggedIn,
-    setIsLoggedIn,
-    logout,
-    loadingProducts,
+    setCartItems(getDefaultCart(allProducts));
   };
 
   return (
-    <HomeContext.Provider value={contextValue}>
+    <HomeContext.Provider
+      value={{
+        popularProducts,
+        allProducts,
+        cartItems,
+        addToCart,
+        decreaseQuantity,
+        removeFromCart,
+        isLoggedIn,
+        setIsLoggedIn,
+        logout,
+        loading,
+      }}
+    >
       {props.children}
     </HomeContext.Provider>
   );
