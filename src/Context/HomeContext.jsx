@@ -21,75 +21,73 @@ const HomeContextProvider = (props) => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
-  // 1️⃣ Fetch products from backend
+  // -------------------------------
+  // 1️⃣ Fetch products and cart
+  // -------------------------------
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchProductsAndCart = async () => {
       try {
-        const res = await fetch(`${BACKEND_URL}/allproducts`);
-        const backendProducts = await res.json();
+        // Fetch products
+        const resProducts = await fetch(`${BACKEND_URL}/allproducts`);
+        const backendProducts = await resProducts.json();
 
-        const normalizedBackendProducts = backendProducts.map((p) => ({
+        const normalizedBackendProducts = backendProducts.map(p => ({
           ...p,
-          id: p.id || p._id,
+          id: Number(p.id || p._id),
+          images: p.images || [p.image],
         }));
 
-        const mergedProducts = [
-          ...localProducts,
-          ...normalizedBackendProducts.filter(
-            (bp) => !localProducts.some((lp) => lp.id === bp.id)
-          ),
-        ];
-
+        const mergedProducts = [...localProducts, ...normalizedBackendProducts];
         setAllProducts(mergedProducts);
-        setCartItems(getDefaultCart(mergedProducts));
+
+        // Prepare default cart
+        let mergedCart = getDefaultCart(mergedProducts);
+
+        // Merge guest cart from localStorage
+        const guestCart = JSON.parse(localStorage.getItem('guestCart') || '{}');
+        for (let id in guestCart) mergedCart[Number(id)] = guestCart[id];
+
+        // If logged in, fetch backend cart
+        const token = localStorage.getItem("token");
+        if (token) {
+          const resCart = await fetch(`${BACKEND_URL}/getcart`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await resCart.json();
+
+          if (data.success && data.cart) {
+            const backendCart = {};
+            for (let [key, value] of Object.entries(data.cart)) {
+              backendCart[Number(key)] = value;
+            }
+
+            // Merge backend cart with guest cart (sum quantities)
+            for (let id in backendCart) {
+              mergedCart[id] = (mergedCart[id] || 0) + backendCart[id];
+            }
+          }
+
+          // Clear guest cart after merging
+          localStorage.removeItem('guestCart');
+        }
+
+        setCartItems(mergedCart);
+
       } catch (err) {
-        console.error("Failed to fetch products:", err);
+        console.error("Error fetching products or cart:", err);
         setAllProducts(localProducts);
         setCartItems(getDefaultCart(localProducts));
-      }
-    };
-
-    fetchProducts();
-  }, []);
-
-  // 2️⃣ Fetch user's cart from backend after products are loaded
-  useEffect(() => {
-    const fetchCart = async () => {
-      const token = localStorage.getItem("token");
-      if (!token || allProducts.length === 0) return;
-
-      try {
-        const res = await fetch(`${BACKEND_URL}/getcart`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-
-        if (data.success && data.cart) {
-          // Convert backend cart keys to numbers to match product IDs
-          const backendCart = {};
-          for (let [key, value] of Object.entries(data.cart)) {
-            backendCart[Number(key)] = value;
-          }
-
-          // Merge backend cart with default cart (keep all products)
-          const mergedCart = { ...getDefaultCart(allProducts) };
-          for (let id in backendCart) {
-            if (backendCart[id] > 0) mergedCart[id] = backendCart[id];
-          }
-
-          setCartItems(mergedCart);
-        }
-      } catch (err) {
-        console.error("Error loading backend cart:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCart();
-  }, [allProducts]);
+    fetchProductsAndCart();
+  }, []);
 
-  // 3️⃣ Save cart whenever it changes
+  // -------------------------------
+  // 2️⃣ Save cart to backend on change
+  // -------------------------------
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -112,31 +110,38 @@ const HomeContextProvider = (props) => {
     saveCart();
   }, [cartItems]);
 
-  // 4️⃣ Cart operations
+  // -------------------------------
+  // 3️⃣ Cart operations
+  // -------------------------------
   const addToCart = (itemId) => {
-    setCartItems((prev) => ({
-      ...prev,
-      [itemId]: (prev[itemId] || 0) + 1,
-    }));
+    setCartItems(prev => {
+      const newCart = { ...prev, [itemId]: (prev[itemId] || 0) + 1 };
+      if (!isLoggedIn) localStorage.setItem('guestCart', JSON.stringify(newCart));
+      return newCart;
+    });
   };
 
   const decreaseQuantity = (itemId) => {
-    setCartItems((prev) => {
-      if (!prev[itemId]) return prev;
+    setCartItems(prev => {
       const newCart = { ...prev };
-      newCart[itemId] = newCart[itemId] - 1;
-      if (newCart[itemId] <= 0) newCart[itemId] = 0;
+      newCart[itemId] = (newCart[itemId] || 0) - 1;
+      if (newCart[itemId] < 0) newCart[itemId] = 0;
+      if (!isLoggedIn) localStorage.setItem('guestCart', JSON.stringify(newCart));
       return newCart;
     });
   };
 
   const removeFromCart = (itemId) => {
-    setCartItems((prev) => ({
-      ...prev,
-      [itemId]: 0,
-    }));
+    setCartItems(prev => {
+      const newCart = { ...prev, [itemId]: 0 };
+      if (!isLoggedIn) localStorage.setItem('guestCart', JSON.stringify(newCart));
+      return newCart;
+    });
   };
 
+  // -------------------------------
+  // 4️⃣ Logout
+  // -------------------------------
   const logout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
