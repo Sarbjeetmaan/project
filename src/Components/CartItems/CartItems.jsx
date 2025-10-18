@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import './CartItems.css';
 import { HomeContext } from '../../Context/HomeContext';
 import { FaTrashAlt, FaPlus, FaMinus } from 'react-icons/fa';
@@ -6,26 +6,44 @@ import { useNavigate } from 'react-router-dom';
 
 export const CartItems = () => {
   const {
-    allProducts,   // ✅ use allProducts instead of only popularProducts
+    allProducts,
     cartItems,
     addToCart,
     removeFromCart,
     decreaseQuantity,
+    isLoggedIn,
   } = useContext(HomeContext);
 
-  const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem('token'); // ✅ Login check
+  const [loading, setLoading] = useState(true); // ✅ loading state
 
-  // ✅ Calculate total using allProducts
+  const navigate = useNavigate();
+
+  // ✅ Set loading to false once products are loaded
+  useEffect(() => {
+    if (allProducts.length > 0) {
+      setLoading(false);
+    }
+  }, [allProducts]);
+
+  // Calculate total
   const cartTotal = allProducts.reduce((total, product) => {
     return total + (product.new_price * (cartItems[product.id] || 0));
   }, 0);
+
+  if (loading) {
+    return (
+      <div className="cart-container">
+        <h2 className="cart-title">SHOPPING BAG</h2>
+        <p>Loading your cart...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="cart-container">
       <h2 className="cart-title">SHOPPING BAG</h2>
       <div className="cart-content">
-        
+
         {/* Left: Cart Items */}
         <div className="cart-items-section">
           {allProducts.map((item) => {
@@ -33,7 +51,7 @@ export const CartItems = () => {
               return (
                 <div className="cart-item" key={item.id}>
                   <img
-                    src={item.images?.[0] || item.image}  // ✅ support multiple images
+                    src={item.images?.[0] || item.image}
                     alt={item.name}
                     className="cart-item-image"
                   />
