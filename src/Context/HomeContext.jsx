@@ -6,8 +6,9 @@ export const HomeContext = createContext(null);
 
 const BACKEND_URL = import.meta.env.VITE_API_URL || "https://backend-91e3.onrender.com";
 
+// Initialize cart with 0 quantities for all products
 const getDefaultCart = (products) => {
-  let cart = {};
+  const cart = {};
   for (let i = 0; i < products.length; i++) {
     cart[products[i].id] = 0;
   }
@@ -51,7 +52,7 @@ const HomeContextProvider = (props) => {
     fetchProducts();
   }, []);
 
-  // 2️⃣ Fetch user's cart from backend **after products are loaded**
+  // 2️⃣ Fetch user's cart from backend after products are loaded
   useEffect(() => {
     const fetchCart = async () => {
       const token = localStorage.getItem("token");
@@ -62,10 +63,20 @@ const HomeContextProvider = (props) => {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
+
         if (data.success && data.cart) {
-          const backendCart = Object.fromEntries(Object.entries(data.cart));
-          // Merge backend cart with default cart to include all product IDs
-          const mergedCart = { ...getDefaultCart(allProducts), ...backendCart };
+          // Convert backend cart keys to numbers to match product IDs
+          const backendCart = {};
+          for (let [key, value] of Object.entries(data.cart)) {
+            backendCart[Number(key)] = value;
+          }
+
+          // Merge backend cart with default cart (keep all products)
+          const mergedCart = { ...getDefaultCart(allProducts) };
+          for (let id in backendCart) {
+            if (backendCart[id] > 0) mergedCart[id] = backendCart[id];
+          }
+
           setCartItems(mergedCart);
         }
       } catch (err) {
@@ -114,17 +125,16 @@ const HomeContextProvider = (props) => {
       if (!prev[itemId]) return prev;
       const newCart = { ...prev };
       newCart[itemId] = newCart[itemId] - 1;
-      if (newCart[itemId] <= 0) delete newCart[itemId];
+      if (newCart[itemId] <= 0) newCart[itemId] = 0;
       return newCart;
     });
   };
 
   const removeFromCart = (itemId) => {
-    setCartItems((prev) => {
-      const newCart = { ...prev };
-      delete newCart[itemId];
-      return newCart;
-    });
+    setCartItems((prev) => ({
+      ...prev,
+      [itemId]: 0,
+    }));
   };
 
   const logout = () => {
