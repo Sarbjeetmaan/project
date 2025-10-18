@@ -12,16 +12,15 @@ const getDefaultCart = (products) => {
   return cart;
 };
 
-const BACKEND_URL = "https://backend-91e3.onrender.com"; // ✅ your backend base URL
+const BACKEND_URL = "https://backend-91e3.onrender.com";
 
 const HomeContextProvider = (props) => {
   const [allProducts, setAllProducts] = useState([...localProducts]);
   const [cartItems, setCartItems] = useState({});
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
-  // ======================================================
-  // 1️ Load products from backend
-  // ======================================================
+  // 1️⃣ Load products from backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -41,20 +40,28 @@ const HomeContextProvider = (props) => {
         ];
 
         setAllProducts(merged);
-        setCartItems(getDefaultCart(merged));
+
+        // Try loading cart from localStorage first
+        const savedCart = localStorage.getItem("cartItems");
+        if (savedCart) {
+          setCartItems(JSON.parse(savedCart));
+        } else {
+          setCartItems(getDefaultCart(merged));
+        }
+
       } catch (err) {
         console.error("Failed to fetch backend products:", err);
         setAllProducts(localProducts);
         setCartItems(getDefaultCart(localProducts));
+      } finally {
+        setLoadingProducts(false);
       }
     };
 
     fetchProducts();
   }, []);
 
-  // ======================================================
-  // 2️ Load cart from MongoDB (after login)
-  // ======================================================
+  // 2️⃣ Load cart from backend if logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -64,7 +71,6 @@ const HomeContextProvider = (props) => {
         .then((res) => res.json())
         .then((data) => {
           if (data.success && data.cart) {
-            // convert MongoDB Map -> JS object
             setCartItems(Object.fromEntries(Object.entries(data.cart)));
           }
         })
@@ -72,10 +78,10 @@ const HomeContextProvider = (props) => {
     }
   }, [isLoggedIn]);
 
-  // ======================================================
-  // 3️ Save cart to MongoDB whenever it changes
-  // ======================================================
+  // 3️⃣ Persist cart locally + backend whenever it changes
   useEffect(() => {
+    localStorage.setItem("cartItems", JSON.stringify(cartItems));
+
     const token = localStorage.getItem("token");
     if (token) {
       fetch(`${BACKEND_URL}/savecart`, {
@@ -89,9 +95,7 @@ const HomeContextProvider = (props) => {
     }
   }, [cartItems]);
 
-  // ======================================================
-  // 4️ Cart Operations
-  // ======================================================
+  // 4️⃣ Cart operations
   const addToCart = (itemId) => {
     setCartItems((prev) => ({
       ...prev,
@@ -133,6 +137,7 @@ const HomeContextProvider = (props) => {
     isLoggedIn,
     setIsLoggedIn,
     logout,
+    loadingProducts,
   };
 
   return (
