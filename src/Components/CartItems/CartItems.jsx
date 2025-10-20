@@ -1,110 +1,63 @@
-import React, { useContext } from 'react';
-import './CartItems.css';
-import { HomeContext } from '../../Context/HomeContext';
-import { FaTrashAlt, FaPlus, FaMinus } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+// src/Components/CartItems/CartItems.jsx
+import React, { useContext } from "react";
+import { HomeContext } from "../../Context/HomeContext";
+import "./CartItems.css";
+import { useNavigate } from "react-router-dom";
 
-export const CartItems = () => {
-  const {
-    allProducts,
-    cartItems,
-    addToCart,
-    removeFromCart,
-    decreaseQuantity,
-    isLoggedIn,
-    loading,
-  } = useContext(HomeContext);
-
+const CartItems = () => {
+  const { allProducts, cartItems, addToCart, decreaseQuantity, removeFromCart } =
+    useContext(HomeContext);
   const navigate = useNavigate();
 
-  const cartTotal = allProducts.reduce((total, product) => {
-    return total + (product.new_price * (cartItems[product.id] || 0));
-  }, 0);
-
-  if (loading) {
-    return (
-      <div className="cart-container">
-        <h2 className="cart-title">SHOPPING BAG</h2>
-        <p>Loading your cart...</p>
-      </div>
+  const getTotal = () =>
+    allProducts.reduce(
+      (sum, p) => sum + (cartItems[p.id] || 0) * p.new_price,
+      0
     );
-  }
-
-  const hasItems = Object.values(cartItems).some(qty => qty > 0);
 
   return (
     <div className="cart-container">
-      <h2 className="cart-title">SHOPPING BAG</h2>
-      {hasItems ? (
-        <div className="cart-content">
-          <div className="cart-items-section">
-            {allProducts.map((item) => {
-              const quantity = cartItems[item.id] || 0;
-              if (quantity > 0) {
-                return (
-                  <div className="cart-item" key={item.id}>
-                    <img
-                      src={item.images?.[0] || item.image}
-                      alt={item.name}
-                      className="cart-item-image"
-                    />
-                    <div className="cart-item-info">
-                      <h3>{item.name}</h3>
-                      <p><strong>Rs. {item.new_price.toFixed(2)}</strong></p>
-                      <p>Quantity: {quantity}</p>
-                      <p>Total: Rs. {(item.new_price * quantity).toFixed(2)}</p>
-
-                      <div className="cart-item-controls">
-                        <button onClick={() => decreaseQuantity(item.id)}><FaMinus /></button>
-                        <span>{quantity}</span>
-                        <button onClick={() => addToCart(item.id)}><FaPlus /></button>
-                        <button onClick={() => removeFromCart(item.id)} className="delete-btn">
-                          <FaTrashAlt />
-                        </button>
-                      </div>
+      <h2>Shopping Bag</h2>
+      {Object.keys(cartItems).length === 0 ||
+      Object.values(cartItems).every((qty) => qty === 0) ? (
+        <div className="empty-cart">
+          Your cart is empty.
+          <button onClick={() => navigate("/")}>Go Shopping</button>
+        </div>
+      ) : (
+        <>
+          <div className="cart-list">
+            {allProducts
+              .filter((p) => cartItems[p.id] > 0)
+              .map((product) => (
+                <div key={product.id} className="cart-item">
+                  <img src={product.image} alt={product.name} />
+                  <div className="cart-item-info">
+                    <h3>{product.name}</h3>
+                    <p>₹{product.new_price}</p>
+                    <div className="cart-item-qty">
+                      <button onClick={() => decreaseQuantity(product.id)}>
+                        -
+                      </button>
+                      <span>{cartItems[product.id]}</span>
+                      <button onClick={() => addToCart(product.id)}>+</button>
                     </div>
+                    <button
+                      className="remove-btn"
+                      onClick={() => removeFromCart(product.id)}
+                    >
+                      Remove
+                    </button>
                   </div>
-                );
-              }
-              return null;
-            })}
+                </div>
+              ))}
           </div>
 
           <div className="cart-summary">
-            <h3>DISCOUNTS <span className="cart-add">ADD</span></h3>
-            <div className="cart-summary-line">
-              <span>Order value</span>
-              <span>Rs. {cartTotal.toFixed(2)}</span>
-            </div>
-            <div className="cart-summary-line">
-              <span>Estimated delivery fee</span>
-              <span>Free</span>
-            </div>
-            <hr />
-            <div className="cart-summary-line total">
-              <strong>TOTAL</strong>
-              <strong>Rs. {cartTotal.toFixed(2)}</strong>
-            </div>
-
-            <button className="checkout-btn">CONTINUE TO CHECKOUT</button>
-
-            {!isLoggedIn && (
-              <button className="signin-btn" onClick={() => navigate('/login')}>
-                SIGN IN
-              </button>
-            )}
-
-            <div className="cart-payment-icons">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png" alt="MasterCard" />
-              <span>Cash on Delivery</span>
-            </div>
+            <h3>Total: ₹{getTotal()}</h3>
+            <button className="checkout-btn">Proceed to Checkout</button>
           </div>
-        </div>
-      ) : (
-        <div className="empty-cart">
-          <p>Your cart is empty.</p>
-        </div>
+        </>
       )}
     </div>
   );

@@ -1,14 +1,15 @@
+// src/Context/HomeContext.jsx
 import React, { createContext, useState, useEffect } from "react";
 import popularProducts from "../assets/data";
 import localProducts from "../assets/allProducts";
 
 export const HomeContext = createContext(null);
 
-const BACKEND_URL = import.meta.env.VITE_API_URL || "https://backend-91e3.onrender.com";
+const BACKEND_URL = "https://backend-91e3.onrender.com";
 
 const getDefaultCart = (products) => {
   const cart = {};
-  products.forEach(p => cart[p.id] = 0);
+  products.forEach((p) => (cart[p.id] = 0));
   return cart;
 };
 
@@ -25,12 +26,28 @@ const HomeContextProvider = (props) => {
         const resProducts = await fetch(`${BACKEND_URL}/allproducts`);
         const backendProducts = await resProducts.json();
 
-        const normalizedBackendProducts = backendProducts.map(p => ({
-          ...p,
-          id: Number(p.id || p._id),
-          images: p.images || [p.image],
-        }));
+        // Normalize backend products
+        const normalizedBackendProducts = backendProducts.map((p, index) => {
+          const fixedImages = (p.images || [p.image || ""])
+            .filter(Boolean)
+            .map((img) =>
+              img.startsWith("http")
+                ? img
+                : `${BACKEND_URL.replace(/\/$/, "")}${
+                    img.startsWith("/") ? "" : "/"
+                  }${img}`
+            );
 
+          return {
+            ...p,
+            id: Number(p.id || p._id || 7000 + index),
+            category: p.category || "all", // ✅ ensures category filter always works
+            images: fixedImages,
+            image: fixedImages[0] || "/placeholder.png",
+          };
+        });
+
+        // Merge local + backend
         const mergedProducts = [...localProducts, ...normalizedBackendProducts];
         setAllProducts(mergedProducts);
 
@@ -38,7 +55,7 @@ const HomeContextProvider = (props) => {
         const defaultCart = getDefaultCart(mergedProducts);
 
         // Guest cart
-        const guestCart = JSON.parse(localStorage.getItem('guestCart') || '{}');
+        const guestCart = JSON.parse(localStorage.getItem("guestCart") || "{}");
         const mergedCart = { ...defaultCart };
         for (let id in guestCart) mergedCart[Number(id)] = guestCart[id];
 
@@ -51,16 +68,16 @@ const HomeContextProvider = (props) => {
           const data = await resCart.json();
           if (data.success && data.cart) {
             for (let [key, value] of Object.entries(data.cart)) {
-              mergedCart[Number(key)] = (mergedCart[Number(key)] || 0) + value;
+              mergedCart[Number(key)] =
+                (mergedCart[Number(key)] || 0) + value;
             }
           }
-          localStorage.removeItem('guestCart');
+          localStorage.removeItem("guestCart");
         }
 
         setCartItems(mergedCart);
-
       } catch (err) {
-        console.error(err);
+        console.error("Error loading products:", err);
         setAllProducts(localProducts);
         setCartItems(getDefaultCart(localProducts));
       } finally {
@@ -94,27 +111,33 @@ const HomeContextProvider = (props) => {
 
   // ---------------- Cart operations ----------------
   const addToCart = (itemId) => {
-    setCartItems(prev => ({ ...prev, [itemId]: (prev[itemId] || 0) + 1 }));
-    if (!isLoggedIn) localStorage.setItem('guestCart', JSON.stringify({ ...cartItems, [itemId]: (cartItems[itemId] || 0) + 1 }));
+    setCartItems((prev) => {
+      const updated = { ...prev, [itemId]: (prev[itemId] || 0) + 1 };
+      if (!isLoggedIn)
+        localStorage.setItem("guestCart", JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const decreaseQuantity = (itemId) => {
-    setCartItems(prev => {
+    setCartItems((prev) => {
       if (!prev[itemId]) return prev;
-      const newCart = { ...prev };
-      newCart[itemId] -= 1;
-      if (newCart[itemId] <= 0) delete newCart[itemId];
-      if (!isLoggedIn) localStorage.setItem('guestCart', JSON.stringify(newCart));
-      return newCart;
+      const updated = { ...prev };
+      updated[itemId]--;
+      if (updated[itemId] <= 0) delete updated[itemId];
+      if (!isLoggedIn)
+        localStorage.setItem("guestCart", JSON.stringify(updated));
+      return updated;
     });
   };
 
   const removeFromCart = (itemId) => {
-    setCartItems(prev => {
-      const newCart = { ...prev };
-      delete newCart[itemId];
-      if (!isLoggedIn) localStorage.setItem('guestCart', JSON.stringify(newCart));
-      return newCart;
+    setCartItems((prev) => {
+      const updated = { ...prev };
+      delete updated[itemId];
+      if (!isLoggedIn)
+        localStorage.setItem("guestCart", JSON.stringify(updated));
+      return updated;
     });
   };
 
@@ -125,18 +148,20 @@ const HomeContextProvider = (props) => {
   };
 
   return (
-    <HomeContext.Provider value={{
-      popularProducts,
-      allProducts,
-      cartItems,
-      addToCart,
-      decreaseQuantity,
-      removeFromCart,
-      isLoggedIn,
-      setIsLoggedIn,
-      logout,
-      loading,
-    }}>
+    <HomeContext.Provider
+      value={{
+        popularProducts,
+        allProducts,
+        cartItems,
+        addToCart,
+        decreaseQuantity,
+        removeFromCart,
+        isLoggedIn,
+        setIsLoggedIn,
+        logout,
+        loading,
+      }}
+    >
       {props.children}
     </HomeContext.Provider>
   );
