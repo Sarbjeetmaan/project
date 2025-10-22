@@ -1,21 +1,21 @@
-import React, { useContext } from 'react';
-import { HomeContext } from '../Context/HomeContext';
-import { Link } from 'react-router-dom';
-import './CSS/ShopCategory.css';
+import React, { useContext } from "react";
+import { HomeContext } from "../Context/HomeContext";
+import { Link } from "react-router-dom";
+import "./CSS/ShopCategory.css";
 
-const ShopCategory = (props) => {
+const ShopCategory = ({ category }) => {
   const { allProducts } = useContext(HomeContext);
 
-  const filteredProducts = allProducts?.filter(
-    (item) => item.category.toLowerCase() === props.category.toLowerCase()
+  const filteredProducts = allProducts.filter(
+    (item) => item.category.toLowerCase() === category.toLowerCase()
   );
 
   return (
     <div className="shop-category">
-      <h1>{props.category.toUpperCase()}</h1>
+      <h1>{category.toUpperCase()}</h1>
       <div className="shop-category-grid">
-        {filteredProducts.map((item, index) => (
-          <Link to={`/product/${item.id}`} key={index} className="shop-category-link">
+        {filteredProducts.map((item) => (
+          <Link to={`/product/${item.id}`} key={item.id} className="shop-category-link">
             <div className="shop-category-item">
               <img src={item.images?.[0] || "/placeholder.png"} alt={item.name} />
               <h3>{item.name}</h3>
