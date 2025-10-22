@@ -1,18 +1,18 @@
 // src/Components/ProductDisplay/ProductDisplay.jsx
-import React, { useContext, useState } from "react";
-import "./ProductDisplay.css";
-import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
-import { HomeContext } from "../../Context/HomeContext";
-import { useNavigate } from "react-router-dom";
+import React, { useContext, useState } from 'react';
+import './ProductDisplay.css';
+import { FaStar, FaStarHalfAlt, FaRegStar } from 'react-icons/fa';
+import { HomeContext } from '../../Context/HomeContext';
+import { useNavigate } from 'react-router-dom';
 
 const ProductDisplay = ({ product }) => {
   const { addToCart } = useContext(HomeContext);
-  const [mainImage, setMainImage] = useState(product.images?.[0]);
+  const [mainImage, setMainImage] = useState(product.images?.[0] || '/placeholder.png');
   const navigate = useNavigate();
 
   const handleAddToCart = () => {
     addToCart(product.id);
-    navigate("/cart");
+    navigate('/cart');
   };
 
   return (
@@ -25,17 +25,13 @@ const ProductDisplay = ({ product }) => {
               src={img}
               alt={`thumb-${idx}`}
               onClick={() => setMainImage(img)}
-              className={mainImage === img ? "active-thumb" : ""}
+              className={mainImage === img ? 'active-thumb' : ''}
             />
           ))}
         </div>
 
         <div className="productdisplay-img">
-          <img
-            className="productdisplay-main-img"
-            src={mainImage}
-            alt={product.name}
-          />
+          <img className="productdisplay-main-img" src={mainImage} alt={product.name} />
         </div>
       </div>
 
