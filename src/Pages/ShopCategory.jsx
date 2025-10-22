@@ -1,38 +1,28 @@
 // src/Pages/ShopCategory.jsx
-import React, { useContext } from 'react';
-import { HomeContext } from '../Context/HomeContext';
-import { Link } from 'react-router-dom';
-import './CSS/ShopCategory.css';
+import React, { useContext } from "react";
+import { HomeContext } from "../Context/HomeContext";
+import { Link } from "react-router-dom";
+import "./CSS/ShopCategory.css";
 
-const ShopCategory = ({ category }) => {
-  const { allProducts, loading } = useContext(HomeContext);
+const ShopCategory = () => {
+  const { products, loading } = useContext(HomeContext);
 
-  if (loading) return <div style={{ padding: '2rem' }}>Loading products...</div>;
-
-  const filteredProducts = allProducts.filter(
-    (item) => item.category.toLowerCase() === category.toLowerCase()
-  );
-
-  if (!filteredProducts.length)
-    return <div style={{ padding: '2rem', color: 'red' }}>No products found.</div>;
+  if (loading) return <p className="loading">Loading products...</p>;
+  if (!products.length)
+    return <p className="no-products">No admin products found.</p>;
 
   return (
     <div className="shop-category">
-      <h1>{category.toUpperCase()}</h1>
-      <div className="shop-category-grid">
-        {filteredProducts.map((item) => (
-          <Link to={`/product/${item.id}`} key={item.id} className="shop-category-link">
-            <div className="shop-category-item">
-              <img src={item.image || item.images[0]} alt={item.name} />
-              <h3>{item.name}</h3>
-              <div className="shop-category-prices">
-                <span className="shop-category-price-new">₹{item.new_price}</span>
-                <span className="shop-category-price-old">₹{item.old_price}</span>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+      {products.map((product) => (
+        <Link key={product.id} to={`/product/${product.id}`} className="product-card">
+          <img src={product.images[0]} alt={product.name} />
+          <h3>{product.name}</h3>
+          <p className="price">
+            <span className="new-price">₹{product.new_price}</span>{" "}
+            <span className="old-price">₹{product.old_price}</span>
+          </p>
+        </Link>
+      ))}
     </div>
   );
 };
