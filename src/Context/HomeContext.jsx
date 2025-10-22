@@ -1,16 +1,9 @@
 // src/Context/HomeContext.jsx
 import React, { createContext, useState, useEffect } from "react";
-import localProducts from "../assets/allProducts";
 
 export const HomeContext = createContext(null);
 
 const BACKEND_URL = "https://backend-91e3.onrender.com";
-
-const getDefaultCart = (products) => {
-  const cart = {};
-  products.forEach((p) => (cart[p.id] = 0));
-  return cart;
-};
 
 const HomeContextProvider = (props) => {
   const [allProducts, setAllProducts] = useState([]);
@@ -22,46 +15,40 @@ const HomeContextProvider = (props) => {
     const fetchProducts = async () => {
       try {
         const res = await fetch(`${BACKEND_URL}/allproducts`);
-        const backendProducts = await res.json();
+        const data = await res.json();
 
-        console.log("Fetched backend products:", backendProducts);
+        // Only admin-added products
+        const adminProducts = data.map((p) => ({
+          id: Number(p.id),
+          name: p.name,
+          images: p.images || [],
+          image: p.images?.[0] || "/placeholder.png",
+          category: p.category || "all",
+          new_price: Number(p.new_price),
+          old_price: Number(p.old_price),
+          available: p.available,
+        }));
 
-        const normalizedBackendProducts = backendProducts.map((p, idx) => {
-          // Ensure images array exists and has valid URLs
-          const images = (p.images || []).filter(Boolean);
-          const fixedImages = images.map((img) =>
-            img.startsWith("http") ? img : `${BACKEND_URL}/${img}`
-          );
-
-          return {
-            ...p,
-            id: Number(p.id || p._id || 7000 + idx),
-            category: p.category || "all",
-            images: fixedImages,
-            image: fixedImages[0] || "/placeholder.png",
-          };
-        });
-
-        // Merge local + backend products
-        const mergedProducts = [...localProducts, ...normalizedBackendProducts];
-        setAllProducts(mergedProducts);
+        setAllProducts(adminProducts);
 
         // Initialize cart
-        const defaultCart = getDefaultCart(mergedProducts);
+        const defaultCart = {};
+        adminProducts.forEach((p) => (defaultCart[p.id] = 0));
 
+        // Merge guest cart
         const guestCart = JSON.parse(localStorage.getItem("guestCart") || "{}");
         const mergedCart = { ...defaultCart };
         for (let id in guestCart) mergedCart[Number(id)] = guestCart[id];
 
-        // Fetch user cart if logged in
+        // Merge backend cart if logged in
         const token = localStorage.getItem("token");
         if (token) {
           const resCart = await fetch(`${BACKEND_URL}/getcart`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-          const data = await resCart.json();
-          if (data.success && data.cart) {
-            for (let [key, value] of Object.entries(data.cart)) {
+          const dataCart = await resCart.json();
+          if (dataCart.success && dataCart.cart) {
+            for (let [key, value] of Object.entries(dataCart.cart)) {
               mergedCart[Number(key)] = (mergedCart[Number(key)] || 0) + value;
             }
           }
@@ -70,9 +57,7 @@ const HomeContextProvider = (props) => {
 
         setCartItems(mergedCart);
       } catch (err) {
-        console.error("Error loading products:", err);
-        setAllProducts(localProducts);
-        setCartItems(getDefaultCart(localProducts));
+        console.error("Failed to fetch products:", err);
       } finally {
         setLoading(false);
       }
@@ -81,54 +66,22 @@ const HomeContextProvider = (props) => {
     fetchProducts();
   }, []);
 
-  // Save cart on changes
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
-    const saveCart = async () => {
-      try {
-        await fetch(`${BACKEND_URL}/savecart`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ cartItems }),
-        });
-      } catch (err) {
-        console.error("Error saving cart:", err);
-      }
-    };
-
-    saveCart();
-  }, [cartItems]);
-
   // Cart operations
-  const addToCart = (itemId) => {
+  const addToCart = (id) => {
+    setCartItems((prev) => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
+  };
+  const decreaseQuantity = (id) => {
     setCartItems((prev) => {
-      const updated = { ...prev, [itemId]: (prev[itemId] || 0) + 1 };
-      if (!isLoggedIn) localStorage.setItem("guestCart", JSON.stringify(updated));
+      const updated = { ...prev };
+      if (updated[id]) updated[id]--;
+      if (updated[id] <= 0) delete updated[id];
       return updated;
     });
   };
-
-  const decreaseQuantity = (itemId) => {
-    setCartItems((prev) => {
-      if (!prev[itemId]) return prev;
-      const updated = { ...prev };
-      updated[itemId]--;
-      if (updated[itemId] <= 0) delete updated[itemId];
-      if (!isLoggedIn) localStorage.setItem("guestCart", JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const removeFromCart = (itemId) => {
+  const removeFromCart = (id) => {
     setCartItems((prev) => {
       const updated = { ...prev };
-      delete updated[itemId];
-      if (!isLoggedIn) localStorage.setItem("guestCart", JSON.stringify(updated));
+      delete updated[id];
       return updated;
     });
   };
@@ -136,7 +89,7 @@ const HomeContextProvider = (props) => {
   const logout = () => {
     localStorage.removeItem("token");
     setIsLoggedIn(false);
-    setCartItems(getDefaultCart(allProducts));
+    setCartItems({});
   };
 
   return (
