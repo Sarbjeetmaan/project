@@ -1,6 +1,6 @@
 // src/Components/ShopCategory/ShopCategory.jsx
 import React, { useContext } from 'react';
-import { HomeContext } from '../../Context/HomeContext';
+import { HomeContext } from '../Context/HomeContext';
 import { Link } from 'react-router-dom';
 import './CSS/ShopCategory.css';
 
