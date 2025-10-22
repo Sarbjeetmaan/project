@@ -1,4 +1,3 @@
-// ✅ ShopCategory.jsx
 import React, { useContext } from 'react';
 import { HomeContext } from '../Context/HomeContext';
 import { Link } from 'react-router-dom';
@@ -18,7 +17,7 @@ const ShopCategory = (props) => {
         {filteredProducts.map((item, index) => (
           <Link to={`/product/${item.id}`} key={index} className="shop-category-link">
             <div className="shop-category-item">
-              <img src={item.image} alt={item.name} />
+              <img src={item.images?.[0] || "/placeholder.png"} alt={item.name} />
               <h3>{item.name}</h3>
               <div className="shop-category-prices">
                 <span className="shop-category-price-new">₹{item.new_price}</span>

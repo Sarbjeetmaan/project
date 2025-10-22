@@ -19,72 +19,73 @@ const HomeContextProvider = (props) => {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
   const [loading, setLoading] = useState(true);
 
-  // ---------------- Load products & cart ----------------
-  useEffect(() => {
-    const initialize = async () => {
-      try {
-        const resProducts = await fetch(`${BACKEND_URL}/allproducts`);
-        const backendProducts = await resProducts.json();
+  // ---------------- Fetch products from backend ----------------
+  const fetchAllProducts = async () => {
+    setLoading(true);
+    try {
+      const resProducts = await fetch(`${BACKEND_URL}/allproducts`);
+      const backendProducts = await resProducts.json();
 
-        // Normalize backend products
-        const normalizedBackendProducts = backendProducts.map((p, index) => {
-          const fixedImages = (p.images || [p.image || ""])
-            .filter(Boolean)
-            .map((img) =>
-              img.startsWith("http")
-                ? img
-                : `${BACKEND_URL.replace(/\/$/, "")}${
-                    img.startsWith("/") ? "" : "/"
-                  }${img}`
-            );
+      const normalizedBackendProducts = backendProducts.map((p, index) => {
+        const fixedImages = (p.images || [p.image || ""])
+          .filter(Boolean)
+          .map((img) =>
+            img.startsWith("http")
+              ? img
+              : `${BACKEND_URL.replace(/\/$/, "")}${
+                  img.startsWith("/") ? "" : "/"
+                }${img}`
+          );
 
-          return {
-            ...p,
-            id: Number(p.id || p._id || 7000 + index),
-            category: p.category || "all", // ✅ ensures category filter always works
-            images: fixedImages,
-            image: fixedImages[0] || "/placeholder.png",
-          };
+        return {
+          ...p,
+          id: Number(p.id || p._id || 7000 + index),
+          category: p.category || "all",
+          images: fixedImages,
+          image: fixedImages[0] || "/placeholder.png",
+        };
+      });
+
+      // Merge local + backend
+      const mergedProducts = [...localProducts, ...normalizedBackendProducts];
+      setAllProducts(mergedProducts);
+
+      // Default cart
+      const defaultCart = getDefaultCart(mergedProducts);
+
+      // Guest cart
+      const guestCart = JSON.parse(localStorage.getItem("guestCart") || "{}");
+      const mergedCart = { ...defaultCart };
+      for (let id in guestCart) mergedCart[Number(id)] = guestCart[id];
+
+      // Backend cart
+      const token = localStorage.getItem("token");
+      if (token) {
+        const resCart = await fetch(`${BACKEND_URL}/getcart`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-
-        // Merge local + backend
-        const mergedProducts = [...localProducts, ...normalizedBackendProducts];
-        setAllProducts(mergedProducts);
-
-        // Default cart
-        const defaultCart = getDefaultCart(mergedProducts);
-
-        // Guest cart
-        const guestCart = JSON.parse(localStorage.getItem("guestCart") || "{}");
-        const mergedCart = { ...defaultCart };
-        for (let id in guestCart) mergedCart[Number(id)] = guestCart[id];
-
-        // Backend cart
-        const token = localStorage.getItem("token");
-        if (token) {
-          const resCart = await fetch(`${BACKEND_URL}/getcart`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          const data = await resCart.json();
-          if (data.success && data.cart) {
-            for (let [key, value] of Object.entries(data.cart)) {
-              mergedCart[Number(key)] =
-                (mergedCart[Number(key)] || 0) + value;
-            }
+        const data = await resCart.json();
+        if (data.success && data.cart) {
+          for (let [key, value] of Object.entries(data.cart)) {
+            mergedCart[Number(key)] = (mergedCart[Number(key)] || 0) + value;
           }
-          localStorage.removeItem("guestCart");
         }
-
-        setCartItems(mergedCart);
-      } catch (err) {
-        console.error("Error loading products:", err);
-        setAllProducts(localProducts);
-        setCartItems(getDefaultCart(localProducts));
-      } finally {
-        setLoading(false);
+        localStorage.removeItem("guestCart");
       }
-    };
-    initialize();
+
+      setCartItems(mergedCart);
+    } catch (err) {
+      console.error("Error loading products:", err);
+      setAllProducts(localProducts);
+      setCartItems(getDefaultCart(localProducts));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ---------------- Load products on mount ----------------
+  useEffect(() => {
+    fetchAllProducts();
   }, []);
 
   // ---------------- Save cart ----------------
@@ -113,8 +114,7 @@ const HomeContextProvider = (props) => {
   const addToCart = (itemId) => {
     setCartItems((prev) => {
       const updated = { ...prev, [itemId]: (prev[itemId] || 0) + 1 };
-      if (!isLoggedIn)
-        localStorage.setItem("guestCart", JSON.stringify(updated));
+      if (!isLoggedIn) localStorage.setItem("guestCart", JSON.stringify(updated));
       return updated;
     });
   };
@@ -125,8 +125,7 @@ const HomeContextProvider = (props) => {
       const updated = { ...prev };
       updated[itemId]--;
       if (updated[itemId] <= 0) delete updated[itemId];
-      if (!isLoggedIn)
-        localStorage.setItem("guestCart", JSON.stringify(updated));
+      if (!isLoggedIn) localStorage.setItem("guestCart", JSON.stringify(updated));
       return updated;
     });
   };
@@ -135,8 +134,7 @@ const HomeContextProvider = (props) => {
     setCartItems((prev) => {
       const updated = { ...prev };
       delete updated[itemId];
-      if (!isLoggedIn)
-        localStorage.setItem("guestCart", JSON.stringify(updated));
+      if (!isLoggedIn) localStorage.setItem("guestCart", JSON.stringify(updated));
       return updated;
     });
   };
@@ -160,6 +158,7 @@ const HomeContextProvider = (props) => {
         setIsLoggedIn,
         logout,
         loading,
+        fetchAllProducts, // ✅ expose fetchAllProducts to call after adding product
       }}
     >
       {props.children}
