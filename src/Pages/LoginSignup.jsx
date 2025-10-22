@@ -57,13 +57,13 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
         localStorage.setItem('role', data.role);
 
         // Role-based redirect
-        if (data.role === 'admin') {
-          // Redirect admin to deployed admin frontend
-          window.location.href = 'https://admin-68ww.vercel.app';
-        } else {
-          // Normal user → stay in user frontend
-          navigate('/');
-        }
+       if (data.role === 'admin') {
+        // Pass token + role in the URL
+         window.location.href = `https://admin-68ww.vercel.app?token=${data.token}&role=${data.role}`;
+          } else {
+             navigate('/');
+          }
+
       }
 
       alert(isSignup ? data.message || 'Signed up successfully' : 'Login successful');
