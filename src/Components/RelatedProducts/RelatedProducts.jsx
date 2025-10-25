@@ -1,22 +1,26 @@
-import React, { useContext } from 'react';
-import './RelatedProducts.css';
-import { HomeContext } from '../../Context/HomeContext';
-import Item from '../Item/Item';
+// src/Components/RelatedProducts/RelatedProducts.jsx
+import React, { useContext } from "react";
+import "./RelatedProducts.css";
+import { HomeContext } from "../../Context/HomeContext";
+import { useNavigate } from "react-router-dom";
 
 const RelatedProducts = ({ currentProduct }) => {
-  const { allProducts } = useContext(HomeContext);
+  const { products, loading } = useContext(HomeContext); // ✅ updated
+  const navigate = useNavigate();
 
-  // Filter related by category, excluding current product
-  let related = allProducts?.filter(
+  if (loading || !products) return null; // ✅ prevent errors while loading
+
+  // Filter related products by same category (excluding current product)
+  let related = products.filter(
     (item) =>
       item.category === currentProduct.category &&
-      item.id !== currentProduct.id
+      item._id !== currentProduct._id
   );
 
+  // Fallback: pick 4 random products if none in same category
   if (!related || related.length === 0) {
-    // Fallback to 4 random products if not enough in same category
-    related = allProducts
-      ?.filter((item) => item.id !== currentProduct.id)
+    related = products
+      .filter((item) => item._id !== currentProduct._id)
       .sort(() => 0.5 - Math.random())
       .slice(0, 4);
   }
@@ -26,14 +30,15 @@ const RelatedProducts = ({ currentProduct }) => {
       <h2>Related Products</h2>
       <div className="related-products-list">
         {related.map((item) => (
-          <Item
-            key={item.id}
-            id={item.id}
-            name={item.name}
-            image={item.image}
-            new_price={item.new_price}
-            old_price={item.old_price}
-          />
+          <div
+            key={item._id}
+            className="related-item"
+            onClick={() => navigate(`/product/${item._id}`)}
+          >
+            <img src={item.images?.[0] || "/placeholder.png"} alt={item.name} />
+            <h3>{item.name}</h3>
+            <p>₹{item.new_price}</p>
+          </div>
         ))}
       </div>
     </div>

@@ -1,3 +1,4 @@
+// src/Components/CartItems/CartItems.jsx
 import React, { useContext } from 'react';
 import './CartItems.css';
 import { HomeContext } from '../../Context/HomeContext';
@@ -6,20 +7,15 @@ import { useNavigate } from 'react-router-dom';
 
 export const CartItems = () => {
   const {
-    allProducts,
-    cartItems,
+    products,
+    cart,
     addToCart,
     removeFromCart,
-    decreaseQuantity,
-    isLoggedIn,
+    clearCart,
     loading,
   } = useContext(HomeContext);
 
   const navigate = useNavigate();
-
-  const cartTotal = allProducts.reduce((total, product) => {
-    return total + (product.new_price * (cartItems[product.id] || 0));
-  }, 0);
 
   if (loading) {
     return (
@@ -30,7 +26,24 @@ export const CartItems = () => {
     );
   }
 
-  const hasItems = Object.values(cartItems).some(qty => qty > 0);
+  // Build cart details (with product info)
+  const cartDetails = cart
+    .map((cartItem) => {
+      const product = products.find((p) => p._id === cartItem.id);
+      return product ? { ...product, quantity: cartItem.quantity } : null;
+    })
+    .filter(Boolean);
+
+  const cartTotal = cartDetails.reduce(
+    (sum, item) => sum + item.new_price * item.quantity,
+    0
+  );
+
+  const handleDecrease = (productId) => {
+    removeFromCart(productId); // removeFromCart already reduces or removes
+  };
+
+  const hasItems = cartDetails.length > 0;
 
   return (
     <div className="cart-container">
@@ -38,40 +51,44 @@ export const CartItems = () => {
       {hasItems ? (
         <div className="cart-content">
           <div className="cart-items-section">
-            {allProducts.map((item) => {
-              const quantity = cartItems[item.id] || 0;
-              if (quantity > 0) {
-                return (
-                  <div className="cart-item" key={item.id}>
-                    <img
-                      src={item.images?.[0] || item.image}
-                      alt={item.name}
-                      className="cart-item-image"
-                    />
-                    <div className="cart-item-info">
-                      <h3>{item.name}</h3>
-                      <p><strong>Rs. {item.new_price.toFixed(2)}</strong></p>
-                      <p>Quantity: {quantity}</p>
-                      <p>Total: Rs. {(item.new_price * quantity).toFixed(2)}</p>
+            {cartDetails.map((item) => (
+              <div className="cart-item" key={item._id}>
+                <img
+                  src={item.images?.[0] || '/placeholder.png'}
+                  alt={item.name}
+                  className="cart-item-image"
+                />
 
-                      <div className="cart-item-controls">
-                        <button onClick={() => decreaseQuantity(item.id)}><FaMinus /></button>
-                        <span>{quantity}</span>
-                        <button onClick={() => addToCart(item.id)}><FaPlus /></button>
-                        <button onClick={() => removeFromCart(item.id)} className="delete-btn">
-                          <FaTrashAlt />
-                        </button>
-                      </div>
-                    </div>
+                <div className="cart-item-info">
+                  <h3>{item.name}</h3>
+                  <p><strong>Rs. {item.new_price.toFixed(2)}</strong></p>
+                  <p>Quantity: {item.quantity}</p>
+                  <p>Total: Rs. {(item.new_price * item.quantity).toFixed(2)}</p>
+
+                  <div className="cart-item-controls">
+                    <button onClick={() => handleDecrease(item._id)}>
+                      <FaMinus />
+                    </button>
+                    <span>{item.quantity}</span>
+                    <button onClick={() => addToCart(item._id)}>
+                      <FaPlus />
+                    </button>
+                    <button
+                      onClick={() => removeFromCart(item._id)}
+                      className="delete-btn"
+                    >
+                      <FaTrashAlt />
+                    </button>
                   </div>
-                );
-              }
-              return null;
-            })}
+                </div>
+              </div>
+            ))}
           </div>
 
           <div className="cart-summary">
-            <h3>DISCOUNTS <span className="cart-add">ADD</span></h3>
+            <h3>
+              DISCOUNTS <span className="cart-add">ADD</span>
+            </h3>
             <div className="cart-summary-line">
               <span>Order value</span>
               <span>Rs. {cartTotal.toFixed(2)}</span>
@@ -86,19 +103,35 @@ export const CartItems = () => {
               <strong>Rs. {cartTotal.toFixed(2)}</strong>
             </div>
 
-            <button className="checkout-btn">CONTINUE TO CHECKOUT</button>
-
-            {!isLoggedIn && (
-              <button className="signin-btn" onClick={() => navigate('/login')}>
-                SIGN IN
+            <button
+                className="checkout-btn"
+                onClick={() => navigate('/checkout')} 
+              >
+                CONTINUE TO CHECKOUT
               </button>
-            )}
+
+            <button
+              className="signin-btn"
+              onClick={() => navigate('/login')}
+            >
+              SIGN IN
+            </button>
 
             <div className="cart-payment-icons">
-              <img src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png" alt="Visa" />
-              <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png" alt="MasterCard" />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png"
+                alt="Visa"
+              />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png"
+                alt="MasterCard"
+              />
               <span>Cash on Delivery</span>
             </div>
+
+            <button className="clear-cart-btn" onClick={clearCart}>
+              CLEAR CART
+            </button>
           </div>
         </div>
       ) : (

@@ -1,23 +1,24 @@
-import React, { useContext } from "react";
+// src/Pages/SearchResults.jsx
+import React, { useContext, useMemo } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { HomeContext } from "../Context/HomeContext";
-import "./CSS/SearchResults.css"; // optional CSS file for styling
+import "./CSS/SearchResults.css";
 
 const SearchResults = () => {
+  const { allProducts = [] } = useContext(HomeContext);
   const location = useLocation();
   const navigate = useNavigate();
-  const { allProducts } = useContext(HomeContext);
 
-  // Extract search query from URL
-  const queryParams = new URLSearchParams(location.search);
-  const query = queryParams.get("q")?.toLowerCase() || "";
+  const query = new URLSearchParams(location.search).get("q")?.toLowerCase() || "";
 
-  // Filter products based on name or category
-  const filteredProducts = allProducts.filter(
-    (product) =>
-      product.name.toLowerCase().includes(query) ||
-      product.category.toLowerCase().includes(query)
-  );
+  const filteredProducts = useMemo(() => {
+    if (!query) return [];
+    return allProducts.filter(
+      (p) =>
+        p.name?.toLowerCase().includes(query) ||
+        p.category?.toLowerCase().includes(query)
+    );
+  }, [query, allProducts]);
 
   return (
     <div className="search-results-page">
@@ -29,14 +30,18 @@ const SearchResults = () => {
         <div className="search-grid">
           {filteredProducts.map((p) => (
             <div
-              key={p.id}
+              key={p._id}
               className="search-card"
-              onClick={() => navigate(`/product/${p.id}`)}
+              onClick={() => navigate(`/product/${p._id}`)}
             >
-              <img src={p.image} alt={p.name} className="search-img" />
+              <img
+                src={p.images?.[0] || "/placeholder.png"}
+                alt={p.name}
+                className="search-img"
+              />
               <div className="search-info">
                 <h3 className="search-name">{p.name}</h3>
-                <p className="search-price">${p.new_price}</p>
+                <p className="search-price">₹{p.new_price}</p>
               </div>
             </div>
           ))}

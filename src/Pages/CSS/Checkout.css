@@ -1,0 +1,222 @@
+/* === General Checkout Page === */
+.checkout-page {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 50px 40px;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+  font-family: "Inter", "Poppins", sans-serif;
+  color: #222;
+  transition: all 0.3s ease;
+}
+
+/* Step Indicator */
+.checkout-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 40px;
+}
+
+.checkout-steps .step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+  font-weight: 500;
+  color: #888;
+  transition: all 0.3s ease;
+}
+
+.checkout-steps .step.active {
+  color: #007bff;
+}
+
+.checkout-steps .step::before {
+  content: attr(data-step);
+  display: inline-block;
+  margin-bottom: 8px;
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  border-radius: 50%;
+  background: #ddd;
+  color: #fff;
+  font-weight: bold;
+}
+
+.checkout-steps .step.active::before {
+  background: linear-gradient(135deg, #007bff, #0056d2);
+  box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+}
+
+.checkout-steps .step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  width: 100%;
+  height: 4px;
+  background: #ddd;
+  z-index: -1;
+}
+
+.checkout-steps .step.active + .step::after {
+  background: linear-gradient(135deg, #007bff, #0056d2);
+}
+
+/* === Address Form === */
+.address-form,
+.order-review,
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeIn 0.4s ease;
+}
+
+.address-form input {
+  padding: 14px 16px;
+  font-size: 15px;
+  border: 1.8px solid #e0e0e0;
+  border-radius: 12px;
+  outline: none;
+  transition: all 0.25s ease;
+}
+
+.address-form input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 12px rgba(0, 123, 255, 0.15);
+}
+
+.address-form button {
+  padding: 14px 0;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #007bff, #0056d2);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.address-form button:hover {
+  transform: translateY(-3px);
+  background: linear-gradient(135deg, #0066ee, #004ab3);
+}
+
+/* === Order Review === */
+.order-review ul {
+  list-style: none;
+  padding: 0;
+}
+
+.order-review li {
+  background: #f6f8fa;
+  padding: 16px 20px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+  color: #333;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.order-review li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+}
+
+.order-review p {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: right;
+  margin-top: 10px;
+}
+
+.order-review button {
+  padding: 14px 22px;
+  border-radius: 12px;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(135deg, #28a745, #218838);
+  transition: all 0.25s ease;
+}
+
+.order-review button:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #2cc152, #1f7432);
+}
+
+/* === Payment Form === */
+.payment-form ul {
+  list-style: none;
+  padding: 0;
+}
+
+.payment-form li {
+  background: #f6f8fa;
+  padding: 16px 20px;
+  margin-bottom: 14px;
+  border-radius: 14px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.payment-form button {
+  width: 60%;
+  margin: 25px auto 0;
+  padding: 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, #ff7b00, #ff5500);
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.payment-form button:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #ff8e26, #e84a00);
+}
+
+/* === Animations === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .checkout-page {
+    padding: 35px 20px;
+  }
+
+  .checkout-steps {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .checkout-steps .step::after {
+    display: none;
+  }
+
+  .address-form button,
+  .order-review button,
+  .payment-form button {
+    width: 100%;
+  }
+}

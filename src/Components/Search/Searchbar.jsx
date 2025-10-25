@@ -6,19 +6,21 @@ import "./SearchBar.css";
 const SearchBar = () => {
   const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
-  const { allProducts } = useContext(HomeContext);
+  const { allProducts = [] } = useContext(HomeContext) || {}; // ✅ Safe fallback
   const navigate = useNavigate();
   const resultsRef = useRef();
 
-  // Filter products dynamically
-  const filteredProducts = allProducts.filter(
-    (p) =>
-      query &&
-      (p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase()))
-  );
+  // ✅ Prevent crash if products not yet loaded
+  const filteredProducts = Array.isArray(allProducts)
+    ? allProducts.filter(
+        (p) =>
+          query &&
+          (p.name.toLowerCase().includes(query.toLowerCase()) ||
+            p.category.toLowerCase().includes(query.toLowerCase()))
+      )
+    : [];
 
-  // Navigate to search results page
+  // ✅ Navigate to search results page
   const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) {
@@ -27,14 +29,14 @@ const SearchBar = () => {
     }
   };
 
-  // When a product is selected
+  // ✅ When a product is selected
   const handleSelect = (id) => {
     setQuery("");
     setShowResults(false);
     navigate(`/product/${id}`);
   };
 
-  // Hide dropdown when clicking outside
+  // ✅ Hide dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (resultsRef.current && !resultsRef.current.contains(e.target)) {
@@ -72,10 +74,15 @@ const SearchBar = () => {
                 className="search-item"
                 onClick={() => handleSelect(p.id)}
               >
-                <img src={p.image} alt={p.name} className="search-item-img" />
+                {/* ✅ Use p.images[0] instead of p.image */}
+                <img
+                  src={p.images?.[0]}
+                  alt={p.name}
+                  className="search-item-img"
+                />
                 <div className="search-item-info">
                   <p className="search-item-name">{p.name}</p>
-                  <p className="search-item-price">${p.new_price}</p>
+                  <p className="search-item-price">₹{p.new_price}</p>
                 </div>
               </div>
             ))

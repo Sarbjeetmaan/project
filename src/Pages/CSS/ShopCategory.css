@@ -1,9 +1,12 @@
+/* src/Pages/CSS/ShopCategory.css */
+
 .shop-category {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 40px 20px;
-  gap: 30px;
+  background-color: #f9f9f9;
+  min-height: 100vh;
 }
 
 .shop-category h1 {
@@ -12,11 +15,12 @@
   font-weight: 600;
   text-transform: capitalize;
   text-align: center;
+  margin-bottom: 30px;
 }
 
 .shop-category-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 30px;
   width: 100%;
   max-width: 1300px;
@@ -24,35 +28,47 @@
 }
 
 .shop-category-item {
-  background-color: #ffffff;
+  background-color: #fff;
   border: 1px solid #eaeaea;
-  border-radius: 10px;
+  border-radius: 14px;
   padding: 16px;
-  transition: transform 0.3s ease;
   text-align: center;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 .shop-category-item:hover {
   transform: scale(1.03);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
 }
 
 .shop-category-item img {
   width: 100%;
-  max-height: 180px;
+  max-height: 220px;
   object-fit: contain;
-  margin-bottom: 12px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: #fff;
+}
+
+.shop-category-item h3 {
+  font-size: 18px;
+  color: #222;
+  font-weight: 500;
+  margin-top: 8px;
 }
 
 .shop-category-prices {
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .shop-category-price-new {
-  color: #007BFF;
+  color: #007bff;
   font-weight: 600;
   font-size: 16px;
 }
@@ -62,28 +78,29 @@
   text-decoration: line-through;
   font-size: 14px;
 }
-@media (max-width: 480px) {
-  .shop-category {
-    padding: 20px 10px;
-    gap: 20px;
-  }
 
+/* Loading and Empty States */
+.loading,
+.no-products {
+  font-size: 18px;
+  color: #555;
+  text-align: center;
+  margin-top: 50px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
   .shop-category h1 {
-    font-size: 24px;
+    font-size: 26px;
   }
 
   .shop-category-grid {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 20px;
     padding: 10px;
   }
 
-  .shop-category-item {
-    padding: 12px;
-  }
-
   .shop-category-item img {
-    max-height: 140px;
+    max-height: 180px;
   }
 
   .shop-category-price-new {
@@ -92,5 +109,15 @@
 
   .shop-category-price-old {
     font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .shop-category h1 {
+    font-size: 22px;
+  }
+
+  .shop-category-grid {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   }
 }
