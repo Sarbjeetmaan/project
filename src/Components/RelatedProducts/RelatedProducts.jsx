@@ -5,10 +5,10 @@ import { HomeContext } from "../../Context/HomeContext";
 import { useNavigate } from "react-router-dom";
 
 const RelatedProducts = ({ currentProduct }) => {
-  const { products, loading } = useContext(HomeContext); // ✅ updated
+  const { products, loading } = useContext(HomeContext); //  updated
   const navigate = useNavigate();
 
-  if (loading || !products) return null; // ✅ prevent errors while loading
+  if (loading || !products) return null; //  prevent errors while loading
 
   // Filter related products by same category (excluding current product)
   let related = products.filter(

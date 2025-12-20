@@ -1,23 +1,34 @@
-import React, { useContext, useState } from "react";
+// src/Components/ProductDisplay/ProductDisplay.jsx
+import React, { useContext, useState, useEffect } from "react";
 import "./ProductDisplay.css";
 import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
 import { HomeContext } from "../../Context/HomeContext";
 import { useNavigate } from "react-router-dom";
-import RelatedProducts from "../RelatedProducts/RelatedProducts"; 
+import RelatedProducts from "../RelatedProducts/RelatedProducts";
 
 const ProductDisplay = ({ product }) => {
   const { addToCart } = useContext(HomeContext);
-  const [mainImage, setMainImage] = useState(
-    product?.images?.[0] || "/placeholder.png"
-  );
   const navigate = useNavigate();
+
+  const [mainImage, setMainImage] = useState("/placeholder.png");
+
+  // Reset main image whenever product changes
+  useEffect(() => {
+    if (product?.images?.length) {
+      setMainImage(product.images[0]);
+    } else {
+      setMainImage("/placeholder.png");
+    }
+  }, [product]);
 
   const handleAddToCart = () => {
     addToCart(product._id);
     navigate("/cart");
   };
 
-  if (!product) return <p className="no-product">No product selected.</p>;
+  if (!product) {
+    return <p className="no-product">No product selected.</p>;
+  }
 
   return (
     <div className="productdisplay-wrapper">
@@ -30,8 +41,10 @@ const ProductDisplay = ({ product }) => {
                 key={idx}
                 src={img || "/placeholder.png"}
                 alt={`${product.name}-${idx}`}
-                onClick={() => setMainImage(img)}
-                className={`thumb-img ${mainImage === img ? "active" : ""}`}
+                onClick={() => img && setMainImage(img)}
+                className={`thumb-img ${
+                  mainImage === img ? "active" : ""
+                }`}
               />
             ))}
           </div>
@@ -39,7 +52,7 @@ const ProductDisplay = ({ product }) => {
           <div className="productdisplay-img">
             <img
               className="productdisplay-main-img"
-              src={mainImage || "/placeholder.png"}
+              src={mainImage}
               alt={product.name}
             />
           </div>
@@ -73,6 +86,8 @@ const ProductDisplay = ({ product }) => {
           </button>
         </div>
       </div>
+
+      {/* RELATED PRODUCTS */}
       <RelatedProducts currentProduct={product} />
     </div>
   );

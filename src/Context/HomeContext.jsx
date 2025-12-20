@@ -13,12 +13,12 @@ export const HomeProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  // 🧠 Persist cart to localStorage
+  //  Persist cart to localStorage
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  // 🛍 Fetch all products
+  //Fetch all products
   const fetchProducts = async (retries = 3) => {
     try {
       const res = await fetch(`${BACKEND_URL}/allproducts`);
@@ -50,7 +50,7 @@ export const HomeProvider = ({ children }) => {
     fetchProducts();
   }, []);
 
-  // 🛒 Add to Cart
+  //Add to Cart
   const addToCart = (productId) => {
     setCart((prevCart) => {
       const existing = prevCart.find((item) => item.id === productId);
@@ -66,7 +66,7 @@ export const HomeProvider = ({ children }) => {
     });
   };
 
-  // ➖ Remove one item (reduce quantity or delete)
+  // Remove one item (reduce quantity or delete)
   const removeFromCart = (productId) => {
     setCart((prevCart) =>
       prevCart
@@ -79,7 +79,7 @@ export const HomeProvider = ({ children }) => {
     );
   };
 
-  // ❌ Clear cart completely
+  //  Clear cart completely
   const clearCart = () => setCart([]);
 
   return (
