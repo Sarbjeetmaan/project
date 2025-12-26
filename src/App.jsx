@@ -14,6 +14,8 @@ import SearchBar from './Components/Search/Searchbar';
 import SearchResults from './Pages/SearchResults';
 import Checkout from "./Pages/Checkout";
 import Orders from './Pages/Orders';
+import Offers from "./Components/Offers/Offers";
+import Popular from "./Components/Popular/Popular";
 
 
 function AppContent() {
@@ -46,7 +48,8 @@ function AppContent() {
         <Route path="/login" element={<LoginSignup />} />
         <Route path="/search" element={<SearchResults />} />
         <Route path="/checkout" element={<Checkout />} />
-        
+        <Route path="/" element={<Offers />} /> {/* your default page */}
+        <Route path="/popular" element={<Popular />} /> {/* popular products page */}
       </Routes>
       {shouldShowFooter && <Footer />}
     </>
