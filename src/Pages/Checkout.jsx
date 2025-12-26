@@ -1,8 +1,8 @@
-// src/Pages/Checkout.jsx
 import React, { useState, useContext } from 'react';
 import AddressForm from '../Components/Checkout/AddressForm';
 import OrderReview from '../Components/Checkout/OrderReview';
 import PaymentForm from '../Components/Checkout/PaymentForm';
+import CheckoutSummary from '../Components/Checkout/CheckoutSummary';
 import { HomeContext } from '../Context/HomeContext';
 import './CSS/Checkout.css';
 
@@ -27,10 +27,29 @@ const Checkout = () => {
   };
 
   return (
-    <div className="checkout-page">
-      {step === 1 && <AddressForm onSubmit={handleAddressSubmit} />}
-      {step === 2 && <OrderReview cartDetails={cartDetails} onNext={nextStep} onBack={prevStep} />}
-      {step === 3 && <PaymentForm address={address} cartDetails={cartDetails} />}
+    <div className="checkout-layout">
+      {/* LEFT PANEL */}
+      <div className="checkout-left">
+        {step === 1 && <AddressForm onSubmit={handleAddressSubmit} />}
+        {step === 2 && (
+          <OrderReview
+            cartDetails={cartDetails}
+            onNext={nextStep}
+            onBack={prevStep}
+          />
+        )}
+        {step === 3 && (
+          <PaymentForm
+            address={address}
+            cartDetails={cartDetails}
+          />
+        )}
+      </div>
+
+      {/* RIGHT PANEL (ALWAYS VISIBLE) */}
+      <div className="checkout-right">
+        <CheckoutSummary cartDetails={cartDetails} />
+      </div>
     </div>
   );
 };
