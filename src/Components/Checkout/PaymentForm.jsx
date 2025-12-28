@@ -14,6 +14,11 @@ const PaymentForm = ({ address, cartDetails }) => {
         return;
       }
 
+      if (paymentMethod === "ONLINE" && !address?.phone) {
+        alert("Phone number is required for online payment");
+        return;
+      }
+
       setLoading(true);
 
       const orderItems = cartDetails.map((item) => ({
@@ -48,7 +53,7 @@ const PaymentForm = ({ address, cartDetails }) => {
         return;
       }
 
-      // 3️⃣ Create Cashfree Order
+      // 3️⃣ Create Cashfree Order (ONLINE only)
       const cfRes = await axios.post(
         "https://backend-91e3.onrender.com/create-cashfree-order",
         { orderId },
@@ -66,8 +71,9 @@ const PaymentForm = ({ address, cartDetails }) => {
         paymentSessionId: cfRes.data.payment_session_id,
         redirectTarget: "_self",
       });
+
     } catch (error) {
-      console.error("Payment Error:", error);
+      console.error("Payment Error:", error.response?.data || error.message);
       alert("Payment failed. Please try again.");
     } finally {
       setLoading(false);
@@ -79,45 +85,28 @@ const PaymentForm = ({ address, cartDetails }) => {
       <h2>Payment</h2>
 
       <h4>Select Payment Method</h4>
-      <div className="payment-options">
-        <label
-          className={`payment-option ${
-            paymentMethod === "COD" ? "active" : ""
-          }`}
-        >
-          <input
-            type="radio"
-            name="payment"
-            value="COD"
-            checked={paymentMethod === "COD"}
-            onChange={() => setPaymentMethod("COD")}
-          />
-          <span>Cash on Delivery</span>
-        </label>
 
-        <label
-          className={`payment-option ${
-            paymentMethod === "ONLINE" ? "active" : ""
-          }`}
-        >
-          <input
-            type="radio"
-            name="payment"
-            value="ONLINE"
-            checked={paymentMethod === "ONLINE"}
-            onChange={() => setPaymentMethod("ONLINE")}
-          />
-          <span>Online Payment (UPI / Card / NetBanking)</span>
-        </label>
-      </div>
+      <label>
+        <input
+          type="radio"
+          checked={paymentMethod === "COD"}
+          onChange={() => setPaymentMethod("COD")}
+        />
+        Cash on Delivery
+      </label>
+
+      <label>
+        <input
+          type="radio"
+          checked={paymentMethod === "ONLINE"}
+          onChange={() => setPaymentMethod("ONLINE")}
+        />
+        Online Payment
+      </label>
 
       <button onClick={handlePlaceOrder} disabled={loading}>
         {loading ? "Processing..." : "Place Order"}
       </button>
-
-      <p className="payment-secure-note">
-        🔒 Your payment is secure and encrypted
-      </p>
     </div>
   );
 };
