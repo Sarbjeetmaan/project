@@ -27,18 +27,13 @@ const PaymentForm = ({ address, cartDetails }) => {
       }
 
       // Prepare order items
-      const orderItems = cartDetails.map((item) => {
-        if (!item._id || !item.new_price) {
-          throw new Error("Invalid cart item detected");
-        }
-        return {
-          productId: item._id,
-          name: item.name,
-          quantity: item.quantity,
-          price: item.new_price,
-          image: item.images?.[0] || "",
-        };
-      });
+      const orderItems = cartDetails.map((item) => ({
+        productId: item._id,
+        name: item.name,
+        quantity: item.quantity,
+        price: item.new_price,
+        image: item.images?.[0] || "",
+      }));
 
       console.log("Placing order with items:", orderItems, "and address:", address);
 
@@ -59,42 +54,59 @@ const PaymentForm = ({ address, cartDetails }) => {
         return;
       }
 
-      // 3️⃣ ONLINE payment flow
-      console.log("Creating Cashfree order for orderId:", orderId);
+      // 3️⃣ ONLINE payment flow: get Cashfree session ID
       const cfRes = await axios.post(
         "https://backend-91e3.onrender.com/create-cashfree-order",
         { orderId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log("Cashfree response:", cfRes.data);
-
-      if (!cfRes.data.payment_session_id) {
-        throw new Error("Cashfree session not created. Response: " + JSON.stringify(cfRes.data));
+      const sessionId = cfRes.data.payment_session_id;
+      if (!sessionId) {
+        throw new Error("Cashfree session not created");
       }
+
+      console.log("Cashfree session ID:", sessionId);
 
       // 4️⃣ Load Cashfree Checkout
       const cashfree = await load({ mode: "sandbox" });
       cashfree.checkout({
-        paymentSessionId: cfRes.data.payment_session_id,
+        paymentSessionId: sessionId,
         redirectTarget: "_self",
       });
 
     } catch (error) {
-      // Detailed logging
       console.error(
         "Order/Payment Error:",
-        error.response ? JSON.stringify(error.response.data, null, 2) : error.message
+        error.response ? error.response.data : error.message
       );
-
-      // Alert user
-      if (paymentMethod === "ONLINE") {
-        alert("💳 Payment failed. Check console for details.");
-      } else if (paymentMethod === "COD") {
-        alert("❌ Order placement failed. Check console for details.");
-      }
+      alert("💳 Payment failed. Check console for details.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // 5️⃣ Verify payment (optional, call on payment-success page)
+  const verifyPayment = async (orderId) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const res = await axios.post(
+        "https://backend-91e3.onrender.com/verify-payment",
+        { orderId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      if (res.data.success) {
+        alert("✅ Payment verified successfully!");
+        window.location.href = "/orders";
+      } else {
+        alert("⚠ Payment not completed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Verify Payment Error:", err.response?.data || err.message);
+      alert("⚠ Payment verification failed. Check console.");
     }
   };
 

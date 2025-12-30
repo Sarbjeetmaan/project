@@ -16,6 +16,7 @@ import Checkout from "./Pages/Checkout";
 import Orders from './Pages/Orders';
 import Offers from "./Components/Offers/Offers";
 import Popular from "./Components/Popular/Popular";
+import PaymentSuccess from './Pages/PaymentSuccess';
 
 
 function AppContent() {
@@ -50,6 +51,7 @@ function AppContent() {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/" element={<Offers />} /> {/* your default page */}
         <Route path="/popular" element={<Popular />} /> {/* popular products page */}
+        <Route path="/payment-success" element={<PaymentSuccess />} />
       </Routes>
       {shouldShowFooter && <Footer />}
     </>
