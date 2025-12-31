@@ -179,12 +179,14 @@ const [showConfirmPassword, setShowConfirmPassword] = useState(false);
           <div className="divider">or</div>
 
           <div className="social-buttons">
-            <button className="google">
-              <FaGoogle /> Continue with Google
-            </button>
-            <button className="facebook">
-              <FaFacebookF /> Continue with Facebook
-            </button>
+            <button className="google disabled" disabled>
+  <FaGoogle /> Continue with Google (Coming Soon)
+</button>
+
+<button className="facebook disabled" disabled>
+  <FaFacebookF /> Continue with Facebook (Coming Soon)
+</button>
+
           </div>
 
           <p className="auth-footer">
