@@ -1,3 +1,4 @@
+// src/Components/SearchBar/SearchBar.jsx
 import React, { useState, useContext, useEffect, useRef } from "react";
 import { HomeContext } from "../../Context/HomeContext";
 import { useNavigate } from "react-router-dom";
@@ -6,21 +7,21 @@ import "./SearchBar.css";
 const SearchBar = () => {
   const [query, setQuery] = useState("");
   const [showResults, setShowResults] = useState(false);
-  const { allProducts = [] } = useContext(HomeContext) || {}; // ✅ Safe fallback
+  const { allProducts = [] } = useContext(HomeContext) || {};
   const navigate = useNavigate();
-  const resultsRef = useRef();
+  const resultsRef = useRef(null);
 
-  // ✅ Prevent crash if products not yet loaded
+  // Filter products safely
   const filteredProducts = Array.isArray(allProducts)
     ? allProducts.filter(
         (p) =>
           query &&
-          (p.name.toLowerCase().includes(query.toLowerCase()) ||
-            p.category.toLowerCase().includes(query.toLowerCase()))
+          (p.name?.toLowerCase().includes(query.toLowerCase()) ||
+            p.category?.toLowerCase().includes(query.toLowerCase()))
       )
     : [];
 
-  // ✅ Navigate to search results page
+  // Submit full search
   const handleSearch = (e) => {
     e.preventDefault();
     if (query.trim()) {
@@ -29,14 +30,14 @@ const SearchBar = () => {
     }
   };
 
-  // ✅ When a product is selected
-  const handleSelect = (id) => {
+  // Select product from dropdown
+  const handleSelect = (productId) => {
     setQuery("");
     setShowResults(false);
-    navigate(`/product/${id}`);
+    navigate(`/product/${productId}`);
   };
 
-  // ✅ Hide dropdown when clicking outside
+  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (resultsRef.current && !resultsRef.current.contains(e.target)) {
@@ -70,13 +71,12 @@ const SearchBar = () => {
           {filteredProducts.length > 0 ? (
             filteredProducts.map((p) => (
               <div
-                key={p.id}
+                key={p._id}
                 className="search-item"
-                onClick={() => handleSelect(p.id)}
+                onClick={() => handleSelect(p._id)}
               >
-                {/* ✅ Use p.images[0] instead of p.image */}
                 <img
-                  src={p.images?.[0]}
+                  src={p.images?.[0] || "/placeholder.png"}
                   alt={p.name}
                   className="search-item-img"
                 />

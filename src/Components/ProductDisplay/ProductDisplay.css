@@ -148,6 +148,54 @@
     padding-right: 0;
   }
 }
+/* Reviews Section */
+.productdisplay-reviews {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.productdisplay-reviews h2 {
+  font-size: 22px;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+.review {
+  background: #f8f9fb;
+  padding: 14px 16px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+
+.review-user {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.review-stars {
+  color: #ffa41c;
+  display: flex;
+  gap: 4px;
+  margin-bottom: 6px;
+  font-size: 16px;
+}
+
+.review-text {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* Empty reviews */
+.no-reviews {
+  font-size: 14px;
+  color: #777;
+  font-style: italic;
+}
+
 
 @media (max-width: 600px) {
   .productdisplay {
